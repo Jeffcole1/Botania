@@ -2,16 +2,19 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Mar 29, 2015, 7:17:41 PM (GMT)]
  */
 package vazkii.botania.api.item;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.Achievement;
+import net.minecraft.util.ResourceLocation;
+
+import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * An item that implements this counts as a Relic item. This is purely for interaction
@@ -20,23 +23,27 @@ import net.minecraft.stats.Achievement;
 public interface IRelic {
 
 	/**
-	 * Binds to the player name passed in.
+	 * Binds to the UUID passed in.
 	 */
-	public void bindToUsername(String playerName, ItemStack stack);
+	public void bindToUUID(UUID uuid, ItemStack stack);
 
 	/**
-	 * Gets the username of the person this relic is bound to.
+	 * Gets the UUID of the person this relic is bound to, or null if a well-formed UUID could not be found
 	 */
-	public String getSoulbindUsername(ItemStack stack);
+	@Nullable
+	public UUID getSoulbindUUID(ItemStack stack);
 
 	/**
-	 * Sets the achievement that this relic binds to.
+	 * Checks if the relic contains a well-formed UUID.
 	 */
-	public void setBindAchievement(Achievement achievement);
+	public boolean hasUUID(ItemStack stack);
 
 	/**
-	 * Gets the achievement that this relic binds to.
+	 * Get the advancement granted when this relic binds
 	 */
-	public Achievement getBindAchievement();
+	@Nullable
+	default ResourceLocation getAdvancement() {
+		return null;
+	}
 
 }

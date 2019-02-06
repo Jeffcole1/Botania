@@ -1,11 +1,11 @@
 package vazkii.botania.common.block.decor.stairs;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 
 public class BlockLivingStairs extends BlockModStairs {
 
-	public BlockLivingStairs(Block source, int meta) {
-		super(source, meta, source.getUnlocalizedName().replaceAll("tile.", "") + meta + "Stairs");
+	public BlockLivingStairs(IBlockState state) {
+		super(state, state.getBlock().getTranslationKey().replaceAll("tile.", "") + state.getBlock().getMetaFromState(state) + "Stairs");
 	}
 
 }

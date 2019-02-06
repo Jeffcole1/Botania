@@ -2,27 +2,40 @@
  * This class was created by <Adubbz>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [? (GMT)]
  */
 package vazkii.botania.common.entity;
 
+import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import vazkii.botania.common.Botania;
 
-public class EntityPixie extends EntityFlyingCreature {
+import javax.annotation.Nonnull;
 
-	EntityLivingBase summoner = null;
-	float damage = 0;
-	PotionEffect effect = null;
+import elucent.albedo.lighting.ILightProvider;
+import elucent.albedo.lighting.Light;
+
+@Optional.Interface(iface="elucent.albedo.lighting.ILightProvider", modid="albedo")
+public class EntityPixie extends EntityFlying implements ILightProvider {
+
+	private static final DataParameter<Integer> TYPE = EntityDataManager.createKey(EntityPixie.class, DataSerializers.VARINT);
+
+	private EntityLivingBase summoner = null;
+	private float damage = 0;
+	private PotionEffect effect = null;
 
 	public EntityPixie(World world) {
 		super(world);
@@ -32,21 +45,21 @@ public class EntityPixie extends EntityFlyingCreature {
 	@Override
 	protected void entityInit() {
 		super.entityInit();
-		dataWatcher.addObject(20, 0);
+		dataManager.register(TYPE, 0);
 	}
 
 	@Override
 	protected void applyEntityAttributes() {
 		super.applyEntityAttributes();
-		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(2.0);
+		getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(2.0);
 	}
 
 	public void setType(int type) {
-		dataWatcher.updateObject(20, type);
+		dataManager.set(TYPE, type);
 	}
 
 	public int getType() {
-		return dataWatcher.getWatchableObjectInt(20);
+		return dataManager.get(TYPE);
 	}
 
 	public void setProps(EntityLivingBase target, EntityLivingBase summoner, int type, float damage) {
@@ -61,7 +74,7 @@ public class EntityPixie extends EntityFlyingCreature {
 	}
 
 	@Override
-	protected void updateEntityActionState() {
+	protected void updateAITasks() {
 		EntityLivingBase target = getAttackTarget();
 		if(target != null) {
 			double d0 = target.posX + target.width / 2 - posX;
@@ -87,7 +100,7 @@ public class EntityPixie extends EntityFlyingCreature {
 				} else target.attackEntityFrom(DamageSource.causeMobDamage(this), damage);
 				if(effect != null && !(target instanceof EntityPlayer))
 					target.addPotionEffect(effect);
-				die();
+				setDead();
 			}
 		}
 
@@ -95,8 +108,8 @@ public class EntityPixie extends EntityFlyingCreature {
 	}
 
 	@Override
-	public boolean attackEntityFrom(DamageSource par1DamageSource, float par2) {
-		if(getType() == 0 && par1DamageSource.getEntity() != summoner || getType() == 1 && par1DamageSource.getEntity() instanceof EntityPlayer)
+	public boolean attackEntityFrom(@Nonnull DamageSource par1DamageSource, float par2) {
+		if(getType() == 0 && par1DamageSource.getTrueSource() != summoner || getType() == 1 && par1DamageSource.getTrueSource() instanceof EntityPlayer)
 			return super.attackEntityFrom(par1DamageSource, par2);
 		return false;
 	}
@@ -105,26 +118,41 @@ public class EntityPixie extends EntityFlyingCreature {
 	public void onEntityUpdate() {
 		super.onEntityUpdate();
 
-		if(getAttackTarget() == null || ticksExisted > 200)
-			die();
+		if(!world.isRemote
+				&& (getAttackTarget() == null || ticksExisted > 200))
+			setDead();
 
 		boolean dark = getType() == 1;
-		if(worldObj.isRemote)
+		if(world.isRemote)
 			for(int i = 0; i < 4; i++)
-				Botania.proxy.sparkleFX(worldObj, posX + (Math.random() - 0.5) * 0.25, posY + 0.5  + (Math.random() - 0.5) * 0.25, posZ + (Math.random() - 0.5) * 0.25, dark ? 0.1F : 1F, dark ? 0.025F : 0.25F, dark ? 0.09F : 0.9F, 0.1F + (float) Math.random() * 0.25F, 12);
+				Botania.proxy.sparkleFX(posX + (Math.random() - 0.5) * 0.25, posY + 0.5  + (Math.random() - 0.5) * 0.25, posZ + (Math.random() - 0.5) * 0.25, dark ? 0.1F : 1F, dark ? 0.025F : 0.25F, dark ? 0.09F : 0.9F, 0.1F + (float) Math.random() * 0.25F, 12);
 	}
 
-	public void die() {
-		setDead();
-
-		if(worldObj.isRemote && getType() == 0)
+	@Override
+	public void setDead() {
+		if(world != null && world.isRemote && getType() == 0)
 			for(int i = 0; i < 12; i++)
-				Botania.proxy.sparkleFX(worldObj, posX + (Math.random() - 0.5) * 0.25, posY + 0.5  + (Math.random() - 0.5) * 0.25, posZ + (Math.random() - 0.5) * 0.25, 1F, 0.25F, 0.9F, 1F + (float) Math.random() * 0.25F, 5);
+				Botania.proxy.sparkleFX(posX + (Math.random() - 0.5) * 0.25, posY + 0.5  + (Math.random() - 0.5) * 0.25, posZ + (Math.random() - 0.5) * 0.25, 1F, 0.25F, 0.9F, 1F + (float) Math.random() * 0.25F, 5);
+		super.setDead();
 	}
 
 	@Override
 	protected boolean canDespawn() {
 		return false;
+	}
+
+	@Override
+	public boolean canBeLeashedTo(EntityPlayer player) {
+		return false;
+	}
+
+	@Override
+	@Optional.Method(modid="albedo")
+	public Light provideLight() {
+		if(getType() == 1)
+			return null;
+		
+		return Light.builder().pos(this).color(1F, 0F, 0.5F).radius(8).build();
 	}
 
 }

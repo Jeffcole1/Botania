@@ -1,17 +1,9 @@
 package vazkii.botania.common.integration.buildcraft;
 
-import net.minecraft.util.IIcon;
 import buildcraft.api.statements.IStatement;
 import buildcraft.api.statements.IStatementParameter;
 
 public abstract class StatementBase implements IStatement {
-	protected IIcon icon;
-
-	@Override
-	public IIcon getIcon() {
-		return icon;
-	}
-
 	@Override
 	public int maxParameters() {
 		return 0;
@@ -30,5 +22,10 @@ public abstract class StatementBase implements IStatement {
 	@Override
 	public IStatement rotateLeft() {
 		return this;
+	}
+
+	@Override
+	public IStatement[] getPossible() {
+		return new IStatement[] { this };
 	}
 }

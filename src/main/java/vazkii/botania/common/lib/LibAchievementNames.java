@@ -2,14 +2,15 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jan 28, 2015, 4:44:34 PM (GMT)]
  */
 package vazkii.botania.common.lib;
 
+// todo update with advancement names and unhardcode the advancement names from where they currently are
 public final class LibAchievementNames {
 
 	public static final String FLOWER_PICKUP = "flowerPickup";
@@ -60,7 +61,6 @@ public final class LibAchievementNames {
 	public static final String RELIC_THOR_RING = "thorRing";
 	public static final String RELIC_ODIN_RING = "odinRing";
 	public static final String RELIC_LOKI_RING = "lokiRing";
-	public static final String RELIC_AESIR_RING = "aesirRing";
 
 	public static final String NULL_FLOWER = "nullFlower";
 	public static final String DESU_GUN = "desuGun";

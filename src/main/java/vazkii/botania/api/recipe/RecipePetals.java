@@ -2,45 +2,47 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jan 22, 2014, 2:02:44 PM (GMT)]
  */
 package vazkii.botania.api.recipe;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.oredict.OreDictionary;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.OreDictionary;
-
 public class RecipePetals {
 
-	ItemStack output;
-	List<Object> inputs;
+	private final ItemStack output;
+	private final ImmutableList<Object> inputs;
 
 	public RecipePetals(ItemStack output, Object... inputs) {
 		this.output = output;
 
-		List<Object> inputsToSet = new ArrayList();
+		ImmutableList.Builder<Object> inputsToSet = ImmutableList.builder();
 		for(Object obj : inputs) {
 			if(obj instanceof String || obj instanceof ItemStack)
 				inputsToSet.add(obj);
 			else throw new IllegalArgumentException("Invalid input");
 		}
 
-		this.inputs = inputsToSet;
+		this.inputs = inputsToSet.build();
 	}
 
-	public boolean matches(IInventory inv) {
-		List<Object> inputsMissing = new ArrayList(inputs);
+	public boolean matches(IItemHandler inv) {
+		List<Object> inputsMissing = new ArrayList<>(inputs);
 
-		for(int i = 0; i < inv.getSizeInventory(); i++) {
+		for(int i = 0; i < inv.getSlots(); i++) {
 			ItemStack stack = inv.getStackInSlot(i);
-			if(stack == null)
+			if(stack.isEmpty())
 				break;
 
 			int stackIndex = -1, oredictIndex = -1;
@@ -48,14 +50,9 @@ public class RecipePetals {
 			for(int j = 0; j < inputsMissing.size(); j++) {
 				Object input = inputsMissing.get(j);
 				if(input instanceof String) {
-					List<ItemStack> validStacks = OreDictionary.getOres((String) input);
 					boolean found = false;
-					for(ItemStack ostack : validStacks) {
-						ItemStack cstack = ostack.copy();
-						if(cstack.getItemDamage() == Short.MAX_VALUE)
-							cstack.setItemDamage(stack.getItemDamage());
-
-						if(stack.isItemEqual(cstack)) {
+					for(ItemStack ostack : OreDictionary.getOres((String) input, false)) {
+						if(OreDictionary.itemMatches(ostack, stack, false)) {
 							oredictIndex = j;
 							found = true;
 							break;
@@ -65,7 +62,7 @@ public class RecipePetals {
 
 					if(found)
 						break;
-				} else if(input instanceof ItemStack && simpleAreStacksEqual((ItemStack) input, stack)) {
+				} else if(input instanceof ItemStack && compareStacks((ItemStack) input, stack)) {
 					stackIndex = j;
 					break;
 				}
@@ -81,12 +78,24 @@ public class RecipePetals {
 		return inputsMissing.isEmpty();
 	}
 
-	boolean simpleAreStacksEqual(ItemStack stack, ItemStack stack2) {
-		return stack.getItem() == stack2.getItem() && stack.getItemDamage() == stack2.getItemDamage();
+	private boolean compareStacks(ItemStack recipe, ItemStack supplied) {
+		if(recipe.getItem() == supplied.getItem() && recipe.getItemDamage() == supplied.getItemDamage()) {
+			//check that the user supplied nbt tag is a superset of the recipe item nbt tag
+			//if the recipe doesn't have an NBT tag, the user supplied one doesn't matter, it is a superset
+			if(!recipe.hasTagCompound()) return true;
+			//if the recipe does have an NBT tag but the user supplied doesn't, also no way it's a superset
+			if(!supplied.hasTagCompound()) return false;
+			
+			NBTTagCompound mergedNBT = supplied.getTagCompound().copy();
+			mergedNBT.merge(recipe.getTagCompound());
+			return supplied.getTagCompound().equals(mergedNBT);
+		}
+		
+		return false;
 	}
 
 	public List<Object> getInputs() {
-		return new ArrayList(inputs);
+		return inputs;
 	}
 
 	public ItemStack getOutput() {

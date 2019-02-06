@@ -2,32 +2,41 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jul 12, 2014, 7:59:00 PM (GMT)]
  */
 package vazkii.botania.common.entity;
 
-import java.util.List;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import vazkii.botania.common.Botania;
+import vazkii.botania.common.core.handler.ModSounds;
 
-public class EntityMagicLandmine extends Entity {
+import javax.annotation.Nonnull;
+
+import elucent.albedo.lighting.ILightProvider;
+import elucent.albedo.lighting.Light;
+
+import java.util.List;
+
+@Optional.Interface(iface="elucent.albedo.lighting.ILightProvider", modid="albedo")
+public class EntityMagicLandmine extends Entity implements ILightProvider {
 
 	public EntityDoppleganger summoner;
 
-	public EntityMagicLandmine(World par1World) {
-		super(par1World);
+	public EntityMagicLandmine(World world) {
+		super(world);
 		setSize(0F, 0F);
 	}
 
@@ -44,24 +53,24 @@ public class EntityMagicLandmine extends Entity {
 		float g = 0F;
 		float b = 0.2F;
 
-		//Botania.proxy.wispFX(worldObj, posX, posY, posZ, r, g, b, 0.6F, -0.2F, 1);
+		//Botania.proxy.wispFX(world, posX, posY, posZ, r, g, b, 0.6F, -0.2F, 1);
 		for(int i = 0; i < 6; i++)
-			Botania.proxy.wispFX(worldObj, posX - range + Math.random() * range * 2, posY, posZ - range + Math.random() * range * 2, r, g, b, 0.4F, -0.015F, 1);
+			Botania.proxy.wispFX(posX - range + Math.random() * range * 2, posY, posZ - range + Math.random() * range * 2, r, g, b, 0.4F, -0.015F, 1);
 
 		if(ticksExisted >= 55) {
-			worldObj.playSoundEffect(posX, posY, posZ, "botania:gaiaTrap", 0.3F, 1F);
+			world.playSound(null, posX, posY, posZ, ModSounds.gaiaTrap, SoundCategory.NEUTRAL, 0.3F, 1F);
 
 			float m = 0.35F;
 			g = 0.4F;
 			for(int i = 0; i < 25; i++)
-				Botania.proxy.wispFX(worldObj, posX, posY + 1, posZ, r, g, b, 0.5F, (float) (Math.random() - 0.5F) * m, (float) (Math.random() - 0.5F) * m, (float) (Math.random() - 0.5F) * m);
+				Botania.proxy.wispFX(posX, posY + 1, posZ, r, g, b, 0.5F, (float) (Math.random() - 0.5F) * m, (float) (Math.random() - 0.5F) * m, (float) (Math.random() - 0.5F) * m);
 
-			if(!worldObj.isRemote) {
-				List<EntityPlayer> players = worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(posX - range, posY - range, posZ - range, posX + range, posY + range, posZ + range));
+			if(!world.isRemote) {
+				List<EntityPlayer> players = world.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB(posX - range, posY - range, posZ - range, posX + range, posY + range, posZ + range));
 				for(EntityPlayer player : players) {
-					player.attackEntityFrom(summoner == null ? DamageSource.generic : DamageSource.causeMobDamage(summoner), 10);
-					player.addPotionEffect(new PotionEffect(Potion.blindness.id, 25, 0));
-					PotionEffect wither = new PotionEffect(Potion.wither.id, 70, 3);
+					player.attackEntityFrom(DamageSource.causeIndirectMagicDamage(this, summoner), 10);
+					player.addPotionEffect(new PotionEffect(MobEffects.BLINDNESS, 25, 0));
+					PotionEffect wither = new PotionEffect(MobEffects.WITHER, 120, 2);
 					wither.getCurativeItems().clear();
 					player.addPotionEffect(wither);
 				}
@@ -76,11 +85,17 @@ public class EntityMagicLandmine extends Entity {
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound var1) {
+	protected void readEntityFromNBT(@Nonnull NBTTagCompound var1) {
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound var1) {
+	protected void writeEntityToNBT(@Nonnull NBTTagCompound var1) {
 	}
 
+	@Override
+	@Optional.Method(modid="albedo")
+	public Light provideLight() {
+		return Light.builder().pos(this).color(0.6F, 0F, 1F).radius(15).build();
+	}
+	
 }

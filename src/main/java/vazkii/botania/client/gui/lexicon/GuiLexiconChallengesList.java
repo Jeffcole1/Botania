@@ -2,19 +2,17 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jun 29, 2015, 4:24:07 PM (GMT)]
  */
 package vazkii.botania.client.gui.lexicon;
 
-import java.util.List;
-
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TextFormatting;
 import vazkii.botania.client.challenge.Challenge;
 import vazkii.botania.client.challenge.EnumChallengeLevel;
 import vazkii.botania.client.challenge.ModChallenges;
@@ -22,20 +20,23 @@ import vazkii.botania.client.core.handler.ClientTickHandler;
 import vazkii.botania.client.gui.lexicon.button.GuiButtonBack;
 import vazkii.botania.client.gui.lexicon.button.GuiButtonChallengeIcon;
 
+import java.io.IOException;
+import java.util.List;
+
 public class GuiLexiconChallengesList extends GuiLexicon implements IParented {
 
-	GuiLexicon parent;
-	GuiButton backButton;
+	private GuiLexicon parent;
+	private GuiButton backButton;
 
 	public GuiLexiconChallengesList() {
 		parent = new GuiLexicon();
-		title = StatCollector.translateToLocal("botaniamisc.challenges");
+		title = I18n.format("botaniamisc.challenges");
 	}
 
 	@Override
 	public void onInitGui() {
 		super.onInitGui();
-		title = StatCollector.translateToLocal("botaniamisc.challenges");
+		title = I18n.format("botaniamisc.challenges");
 
 		buttonList.add(backButton = new GuiButtonBack(12, left + guiWidth / 2 - 8, top + guiHeight + 2));
 
@@ -54,11 +55,11 @@ public class GuiLexiconChallengesList extends GuiLexicon implements IParented {
 	}
 
 	@Override
-	public void drawScreen(int par1, int par2, float par3) {
-		super.drawScreen(par1, par2, par3);
+	public void drawScreenAfterScale(int xCoord, int yCoord, float newPartialTicks) {
+		super.drawScreenAfterScale(xCoord, yCoord, newPartialTicks);
 
-		boolean unicode = fontRendererObj.getUnicodeFlag();
-		fontRendererObj.setUnicodeFlag(true);
+		boolean unicode = fontRenderer.getUnicodeFlag();
+		fontRenderer.setUnicodeFlag(true);
 		for(EnumChallengeLevel level : EnumChallengeLevel.class.getEnumConstants()) {
 			List<Challenge> list = ModChallenges.challenges.get(level);
 			int complete = 0;
@@ -66,13 +67,13 @@ public class GuiLexiconChallengesList extends GuiLexicon implements IParented {
 				if(c.complete)
 					complete++;
 
-			fontRendererObj.drawString(EnumChatFormatting.BOLD + StatCollector.translateToLocal(level.getName()) + EnumChatFormatting.RESET + " (" + complete + "/" + list.size() + ")", left + 20, top + 11 + level.ordinal() * 44, 0);
+			fontRenderer.drawString(TextFormatting.BOLD + I18n.format(level.getName()) + TextFormatting.RESET + " (" + complete + "/" + list.size() + ")", left + 20, top + 11 + level.ordinal() * 44, 0);
 		}
-		fontRendererObj.setUnicodeFlag(unicode);
+		fontRenderer.setUnicodeFlag(unicode);
 	}
 
 	@Override
-	protected void keyTyped(char par1, int par2) {
+	protected void keyTyped(char par1, int par2) throws IOException {
 		if(par2 == 14 && !notesEnabled) // Backspace
 			back();
 		else if(par2 == 199) { // Home
@@ -84,7 +85,7 @@ public class GuiLexiconChallengesList extends GuiLexicon implements IParented {
 	}
 
 	@Override
-	protected void mouseClicked(int par1, int par2, int par3) {
+	protected void mouseClicked(int par1, int par2, int par3) throws IOException {
 		super.mouseClicked(par1, par2, par3);
 
 		if(par3 == 1)
@@ -105,10 +106,10 @@ public class GuiLexiconChallengesList extends GuiLexicon implements IParented {
 			notesEnabled = !notesEnabled;
 	}
 
-	void back() {
+	private void back() {
 		if(backButton.enabled) {
 			actionPerformed(backButton);
-			backButton.func_146113_a(mc.getSoundHandler());
+			backButton.playPressSound(mc.getSoundHandler());
 		}
 	}
 

@@ -2,17 +2,19 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jan 14, 2014, 5:29:31 PM (GMT)]
  */
 package vazkii.botania.client.lib;
 
+import vazkii.botania.common.lib.LibMisc;
+
 public final class LibResources {
 
-	public static final String PREFIX_MOD = "botania:";
+	public static final String PREFIX_MOD = LibMisc.MOD_ID + ":";
 
 	public static final String PREFIX_LANG = "/assets/botania/lang/";
 	public static final String PREFIX_SHADER = "/assets/botania/shader/";
@@ -54,8 +56,6 @@ public final class LibResources {
 	public static final String ENTRY_APOTHECARY = PREFIX_ENTRIES + "apothecary.png";
 	public static final String ENTRY_PURE_DAISY = PREFIX_ENTRIES + "pureDaisy.png";
 	public static final String ENTRY_SPREADER = PREFIX_ENTRIES + "spreader.png";
-	public static final String ENTRY_UNSTABLE_BLOCK = PREFIX_ENTRIES + "unstableBlock.png";
-	public static final String ENTRY_UNSTABLE_BEACON = PREFIX_ENTRIES + "unstableBeacon.png";
 	public static final String ENTRY_BAUBLES = PREFIX_ENTRIES + "baubles.png";
 	public static final String ENTRY_ELVEN_GARDE = PREFIX_ENTRIES + "elvenGarde.png";
 	public static final String ENTRY_DIMINISHING_RETURNS = PREFIX_ENTRIES + "diminishingReturns.png";
@@ -65,84 +65,69 @@ public final class LibResources {
 	public static final String ENTRY_METAMORPHIC_STONES = PREFIX_ENTRIES + "metamorphicStones.png";
 	public static final String ENTRY_BANNERS = PREFIX_ENTRIES + "banners.png";
 
-	public static final String MODEL_ALTAR = PREFIX_MODEL + "altar.png";
-	public static final String MODEL_ALTAR_META = PREFIX_MODEL + "altarMeta%d.png";
-	public static final String MODEL_ALTAR_MOSSY = PREFIX_MODEL + "altarMossy.png";
-	public static final String MODEL_SPREADER = PREFIX_MODEL + "spreader.png";
-	public static final String MODEL_SPREADER_REDSTONE = PREFIX_MODEL + "spreaderRedstone.png";
-	public static final String MODEL_SPREADER_DREAMWOOD = PREFIX_MODEL + "spreaderDreamwood.png";
-	public static final String MODEL_SPREADER_HALLOWEEN = PREFIX_MODEL + "spreader_halloween.png";
-	public static final String MODEL_SPREADER_REDSTONE_HALLOWEEN = PREFIX_MODEL + "spreaderRedstone_halloween.png";
-	public static final String MODEL_SPREADER_DREAMWOOD_HALLOWEEN = PREFIX_MODEL + "spreaderDreamwood_halloween.png";
-	public static final String MODEL_POOL = PREFIX_MODEL + "pool.png";
-	public static final String MODEL_INFINITE_POOL = PREFIX_MODEL + "infinitePool.png";
-	public static final String MODEL_DILUTED_POOL = PREFIX_MODEL + "dilutedPool.png";
-	public static final String MODEL_PYLON_OLD = PREFIX_MODEL + "pylonOld.png";
-	public static final String MODEL_PYLON = PREFIX_MODEL + "pylon.png";
-	public static final String MODEL_PYLON_GREEN_OLD = PREFIX_MODEL + "pylonOld1.png";
-	public static final String MODEL_PYLON_GREEN = PREFIX_MODEL + "pylon1.png";
-	public static final String MODEL_PYLON_PINK_OLD = PREFIX_MODEL + "pylonOld2.png";
-	public static final String MODEL_PYLON_PINK = PREFIX_MODEL + "pylon2.png";
-	public static final String MODEL_LEXICA = PREFIX_MODEL + "lexica.png";
-	public static final String MODEL_MANASTEEL_0 = PREFIX_MODEL + "manasteel0.png";
-	public static final String MODEL_MANASTEEL_1 = PREFIX_MODEL + "manasteel1.png";
-	public static final String MODEL_MANASTEEL_2 = PREFIX_MODEL + "manasteel2.png";
-	public static final String MODEL_MANASTEEL_NEW = PREFIX_MODEL + "manasteelNew.png";
-	public static final String MODEL_TERRASTEEL_0 = PREFIX_MODEL + "terrasteel0.png";
-	public static final String MODEL_TERRASTEEL_1 = PREFIX_MODEL + "terrasteel1.png";
-	public static final String MODEL_TERRASTEEL_2 = PREFIX_MODEL + "terrasteel2.png";
-	public static final String MODEL_TERRASTEEL_NEW = PREFIX_MODEL + "terrasteelNew.png";
-	public static final String MODEL_ELEMENTIUM_0 = PREFIX_MODEL + "elementium0.png";
-	public static final String MODEL_ELEMENTIUM_1 = PREFIX_MODEL + "elementium1.png";
-	public static final String MODEL_ELEMENTIUM_2 = PREFIX_MODEL + "elementium2.png";
-	public static final String MODEL_ELEMENTIUM_NEW = PREFIX_MODEL + "elementiumNew.png";
-	public static final String MODEL_MANAWEAVE_0 = PREFIX_MODEL + "manaweave0.png";
-	public static final String MODEL_MANAWEAVE_1 = PREFIX_MODEL + "manaweave1.png";
-	public static final String MODEL_MANAWEAVE_NEW = PREFIX_MODEL + "manaweaveNew.png";
-	public static final String MODEL_MANAWEAVE_NEW_HOLIDAY = PREFIX_MODEL + "manaweaveNewHoliday.png";
+	public static final String MODEL_SPREADER = PREFIX_MODEL + "spreader_mana.png";
+	public static final String MODEL_SPREADER_REDSTONE = PREFIX_MODEL + "spreader_redstone.png";
+	public static final String MODEL_SPREADER_DREAMWOOD = PREFIX_MODEL + "spreader_dreamwood.png";
+	public static final String MODEL_SPREADER_GAIA = PREFIX_MODEL + "spreader_gaia.png";
+	public static final String MODEL_SPREADER_HALLOWEEN = PREFIX_MODEL + "spreader_mana_halloween.png";
+	public static final String MODEL_SPREADER_REDSTONE_HALLOWEEN = PREFIX_MODEL + "spreader_redstone_halloween.png";
+	public static final String MODEL_SPREADER_DREAMWOOD_HALLOWEEN = PREFIX_MODEL + "spreader_dreamwood_halloween.png";
+	public static final String MODEL_SPREADER_GAIA_HALLOWEEN = PREFIX_MODEL + "spreader_gaia_halloween.png";
+	public static final String MODEL_PYLON_MANA = PREFIX_MODEL + "pylon_mana.png";
+	public static final String MODEL_PYLON_NATURA = PREFIX_MODEL + "pylon_natura.png";
+	public static final String MODEL_PYLON_GAIA = PREFIX_MODEL + "pylon_gaia.png";
+	public static final String MODEL_LEXICA_DEFAULT = PREFIX_MODEL + "lexicon_default.png";
+	public static final String MODEL_LEXICA_ELVEN = PREFIX_MODEL + "lexicon_elven.png";
+	public static final String MODEL_MANASTEEL_0 = PREFIX_MODEL + "manasteel_0.png";
+	public static final String MODEL_MANASTEEL_1 = PREFIX_MODEL + "manasteel_1.png";
+	public static final String MODEL_MANASTEEL_2 = PREFIX_MODEL + "manasteel_2.png";
+	public static final String MODEL_MANASTEEL_NEW = PREFIX_MODEL + "armor_manasteel.png";
+	public static final String MODEL_TERRASTEEL_0 = PREFIX_MODEL + "terrasteel_0.png";
+	public static final String MODEL_TERRASTEEL_1 = PREFIX_MODEL + "terrasteel_1.png";
+	public static final String MODEL_TERRASTEEL_2 = PREFIX_MODEL + "terrasteel_2.png";
+	public static final String MODEL_TERRASTEEL_NEW = PREFIX_MODEL + "armor_terrasteel.png";
+	public static final String MODEL_ELEMENTIUM_0 = PREFIX_MODEL + "elementium_0.png";
+	public static final String MODEL_ELEMENTIUM_1 = PREFIX_MODEL + "elementium_1.png";
+	public static final String MODEL_ELEMENTIUM_2 = PREFIX_MODEL + "elementium_2.png";
+	public static final String MODEL_ELEMENTIUM_NEW = PREFIX_MODEL + "armor_elementium.png";
+	public static final String MODEL_MANAWEAVE_0 = PREFIX_MODEL + "manaweave_0.png";
+	public static final String MODEL_MANAWEAVE_1 = PREFIX_MODEL + "manaweave_1.png";
+	public static final String MODEL_MANAWEAVE_NEW = PREFIX_MODEL + "armor_manaweave.png";
+	public static final String MODEL_MANAWEAVE_NEW_HOLIDAY = PREFIX_MODEL + "armor_manaweave_holiday.png";
 	public static final String MODEL_PIXIE = PREFIX_MODEL + "pixie.png";
-	public static final String MODEL_TINY_POTATO = PREFIX_MODEL + "tinyPotato.png";
-	public static final String MODEL_TINY_POTATO_GS = PREFIX_MODEL + "tinyPotatoGray.png";
-	public static final String MODEL_TINY_POTATO_HALLOWEEN = PREFIX_MODEL + "tinyPotato_halloween.png";
-	public static final String MODEL_SPAWNER_CLAW = PREFIX_MODEL + "spawnerClaw.png";
+	public static final String MODEL_PIXIE_HALLOWEEN = PREFIX_MODEL + "pixie_halloween.png";
+	public static final String MODEL_TINY_POTATO = PREFIX_MODEL + "tiny_potato.png";
+	public static final String MODEL_TINY_POTATO_GS = PREFIX_MODEL + "tiny_potato_gray.png";
+	public static final String MODEL_TINY_POTATO_HALLOWEEN = PREFIX_MODEL + "tiny_potato_halloween.png";
+	public static final String MODEL_TRAVEL_BELT = PREFIX_MODEL + "belt_travel.png";
+	public static final String MODEL_SUPER_TRAVEL_BELT = PREFIX_MODEL + "belt_travel_super.png";
+	public static final String MODEL_SPEED_UP_BELT = PREFIX_MODEL + "belt_speed.png";
+	public static final String MODEL_KNOCKBACK_BELT = PREFIX_MODEL + "belt_knockback.png";
+	public static final String MODEL_HOLY_CLOAK = PREFIX_MODEL + "cloak_holy.png";
+	public static final String MODEL_UNHOLY_CLOAK = PREFIX_MODEL + "cloak_unholy.png";
+	public static final String MODEL_BALANCE_CLOAK = PREFIX_MODEL + "cloak_balance.png";
+	public static final String MODEL_HOLY_CLOAK_GLOW = PREFIX_MODEL + "cloak_holy_glow.png";
+	public static final String MODEL_UNHOLY_CLOAK_GLOW = PREFIX_MODEL + "cloak_unholy_glow.png";
+	public static final String MODEL_BALANCE_CLOAK_GLOW = PREFIX_MODEL + "cloak_balance_glow.png";
+	public static final String MODEL_CORPOREA_INDEX = PREFIX_MODEL + "corporea_index.png";
+	public static final String MODEL_INVISIBLE_ARMOR = PREFIX_MODEL + "armor_invisible.png";
+	public static final String MODEL_PINK_WITHER = PREFIX_MODEL + "wither_pink.png";
 	public static final String MODEL_BREWERY = PREFIX_MODEL + "brewery.png";
-	public static final String MODEL_TRAVEL_BELT = PREFIX_MODEL + "travelBelt.png";
-	public static final String MODEL_SUPER_TRAVEL_BELT = PREFIX_MODEL + "superTravelBelt.png";
-	public static final String MODEL_SPEED_UP_BELT = PREFIX_MODEL + "speedUpBelt.png";
-	public static final String MODEL_KNOCKBACK_BELT = PREFIX_MODEL + "knockbackBelt.png";
-	public static final String MODEL_HOLY_CLOAK = PREFIX_MODEL + "holyCloak.png";
-	public static final String MODEL_UNHOLY_CLOAK = PREFIX_MODEL + "unholyCloak.png";
-	public static final String MODEL_CORPOREA_INDEX = PREFIX_MODEL + "corporeaIndex.png";
-	public static final String MODEL_INVISIBLE_ARMOR = PREFIX_MODEL + "invisibleArmor.png";
-	public static final String MODEL_PUMP = PREFIX_MODEL + "pump.png";
-	public static final String MODEL_MINI_ISLAND = PREFIX_MODEL + "miniIsland.png";
-	public static final String MODEL_MINI_ISLAND_PODZOL = PREFIX_MODEL + "miniIslandPodzol.png";
-	public static final String MODEL_MINI_ISLAND_MYCEL = PREFIX_MODEL + "miniIslandMycelium.png";
-	public static final String MODEL_MINI_ISLAND_SNOW = PREFIX_MODEL + "miniIslandSnow.png";
-	public static final String MODEL_MINI_ISLAND_DRY = PREFIX_MODEL + "miniIslandDry.png";
-	public static final String MODEL_MINI_ISLAND_GOLDEN = PREFIX_MODEL + "miniIslandGolden.png";
-	public static final String MODEL_MINI_ISLAND_VIVID = PREFIX_MODEL + "miniIslandVivid.png";
-	public static final String MODEL_MINI_ISLAND_SCORCHED = PREFIX_MODEL + "miniIslandScorched.png";
-	public static final String MODEL_MINI_ISLAND_INFUSED = PREFIX_MODEL + "miniIslandInfused.png";
-	public static final String MODEL_MINI_ISLAND_MUTATED = PREFIX_MODEL + "miniIslandMutated.png";
-	public static final String MODEL_PINK_WITHER = PREFIX_MODEL + "pinkWither.png";
-	public static final String MODEL_CRYSTAL_CUBE = PREFIX_MODEL + "crystalCube.png";
-	public static final String MODEL_INCENSE_PLATE = PREFIX_MODEL + "incensePlate.png";
 	public static final String MODEL_HOURGLASS = PREFIX_MODEL + "hourglass.png";
-	public static final String MODEL_COCOON = PREFIX_MODEL + "cocoon.png";
 	public static final String MODEL_BELLOWS = PREFIX_MODEL + "bellows.png";
 	public static final String MODEL_TERU_TERU_BOZU = PREFIX_MODEL + "teruTeruBozu.png";
 	public static final String MODEL_TERU_TERU_BOZU_HALLOWEEN = PREFIX_MODEL + "teruTeruBozu_halloween.png";
 	public static final String MODEL_AVATAR = PREFIX_MODEL + "avatar.png";
-	public static final String MODEL_AVATAR_DIVINING = PREFIX_MODEL + "avatarDivining.png";
-	public static final String MODEL_AVATAR_FIRE = PREFIX_MODEL + "avatarFire.png";
-	public static final String MODEL_AVATAR_MISSILE = PREFIX_MODEL + "avatarMissile.png";
-	public static final String MODEL_AVATAR_RAINBOW = PREFIX_MODEL + "avatarRainbow.png";
-	public static final String MODEL_AVATAR_TORNADO = PREFIX_MODEL + "avatarTornado.png";
+	public static final String MODEL_AVATAR_DIVINING = PREFIX_MODEL + "avatar_divining.png";
+	public static final String MODEL_AVATAR_FIRE = PREFIX_MODEL + "avatar_fire.png";
+	public static final String MODEL_AVATAR_MISSILE = PREFIX_MODEL + "avatar_missile.png";
+	public static final String MODEL_AVATAR_RAINBOW = PREFIX_MODEL + "avatar_rainbow.png";
+	public static final String MODEL_AVATAR_TORNADO = PREFIX_MODEL + "avatar_tornado.png";
+	public static final String MODEL_AVATAR_DIRT = PREFIX_MODEL + "avatar_dirt.png";
 
 	public static final String MISC_PARTICLES = PREFIX_MISC + "particles.png";
-	public static final String MISC_WISP_LARGE = PREFIX_MISC + "wispLarge.png";
-	public static final String MISC_WISP_SMALL = PREFIX_MISC + "wispSmall.png";
+	public static final String MISC_WISP_LARGE = PREFIX_MISC + "wisp_large.png";
+	public static final String MISC_WISP_SMALL = PREFIX_MISC + "wisp_small.png";
 	public static final String MISC_HALO = PREFIX_MISC + "halo.png";
 	public static final String MISC_GLOW_GREEN = PREFIX_MISC + "glow0.png";
 	public static final String MISC_GLOW_CYAN = PREFIX_MISC + "glow1.png";
@@ -150,8 +135,6 @@ public final class LibResources {
 	public static final String MISC_SKYBOX = PREFIX_MISC + "skybox.png";
 	public static final String MISC_RAINBOW = PREFIX_MISC + "rainbow.png";
 	public static final String MISC_PLANET = PREFIX_MISC + "planet";
-
-	public static final String OBJ_MODEL_PYLON = PREFIX_OBJ_MODEL + "pylon.obj";
 
 	public static final String CATEGORY_INDEX = PREFIX_CATEGORIES + "index.png";
 
@@ -166,5 +149,7 @@ public final class LibResources {
 	public static final String SHADER_FILM_GRAIN_FRAG = PREFIX_SHADER + "film_grain.frag";
 	public static final String SHADER_GOLD_FRAG = PREFIX_SHADER + "gold.frag";
 	public static final String SHADER_CATEGORY_BUTTON_FRAG = PREFIX_SHADER + "category_button.frag";
+	public static final String SHADER_ALPHA_FRAG = PREFIX_SHADER + "alpha.frag";
+	public static final String SHADER_ALPHA_VERT = PREFIX_SHADER + "alpha.vert";
 
 }

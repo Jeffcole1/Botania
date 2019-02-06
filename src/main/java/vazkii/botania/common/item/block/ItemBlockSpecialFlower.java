@@ -2,104 +2,121 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jan 25, 2014, 2:04:15 PM (GMT)]
  */
 package vazkii.botania.common.item.block;
 
-import java.util.List;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementManager;
+import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.block.Block;
-import net.minecraft.entity.item.EntityItem;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.Achievement;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import vazkii.botania.api.BotaniaAPI;
 import vazkii.botania.api.lexicon.IRecipeKeyProvider;
 import vazkii.botania.api.subtile.SubTileEntity;
+import vazkii.botania.api.subtile.SubTileFunctional;
+import vazkii.botania.api.subtile.SubTileGenerating;
 import vazkii.botania.api.subtile.signature.SubTileSignature;
-import vazkii.botania.common.achievement.ModAchievements;
 import vazkii.botania.common.block.ModBlocks;
 import vazkii.botania.common.block.tile.TileSpecialFlower;
 import vazkii.botania.common.core.handler.ConfigHandler;
 import vazkii.botania.common.core.helper.ItemNBTHelper;
-import vazkii.botania.common.lib.LibBlockNames;
+import vazkii.botania.common.core.helper.PlayerHelper;
 import vazkii.botania.common.lib.LibMisc;
 
+import javax.annotation.Nonnull;
+import java.util.List;
+
+@Mod.EventBusSubscriber(modid = LibMisc.MOD_ID)
 public class ItemBlockSpecialFlower extends ItemBlockMod implements IRecipeKeyProvider {
 
 	public ItemBlockSpecialFlower(Block block1) {
 		super(block1);
+		setHasSubtypes(true);
 	}
 
 	@Override
-	public IIcon getIconIndex(ItemStack stack) {
-		return BotaniaAPI.getSignatureForName(getType(stack)).getIconForStack(stack);
-	}
-
-	@Override
-	public IIcon getIcon(ItemStack stack, int pass) {
-		return getIconIndex(stack);
-	}
-
-	@Override
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
-		boolean placed = super.placeBlockAt(stack, player, world, x, y, z, side, hitX, hitY, hitZ, metadata);
+	public boolean placeBlockAt(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, World world, @Nonnull BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, @Nonnull IBlockState newState) {
+		boolean placed = super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 		if(placed) {
 			String type = getType(stack);
-			TileEntity te = world.getTileEntity(x, y, z);
+			TileEntity te = world.getTileEntity(pos);
 			if(te instanceof TileSpecialFlower) {
 				TileSpecialFlower tile = (TileSpecialFlower) te;
 				tile.setSubTile(type);
-				tile.onBlockAdded(world, x, y, z);
-				tile.onBlockPlacedBy(world, x, y, z, player, stack);
+				tile.onBlockAdded(world, pos, newState);
+				tile.onBlockPlacedBy(world, pos, newState, player, stack);
 				if(!world.isRemote)
-					world.markBlockForUpdate(x, y, z);
+					world.notifyBlockUpdate(pos, world.getBlockState(pos), world.getBlockState(pos), 8);
 			}
 		}
 
 		return placed;
 	}
 
+	@Nonnull
 	@Override
-	public String getUnlocalizedName(ItemStack stack) {
+	public String getTranslationKey(ItemStack stack) {
 		return BotaniaAPI.getSignatureForName(getType(stack)).getUnlocalizedNameForStack(stack);
 	}
 
+	@Nonnull
 	@Override
-	public String getUnlocalizedNameInefficiently(ItemStack par1ItemStack) {
+	public String getUnlocalizedNameInefficiently(@Nonnull ItemStack par1ItemStack) {
 		return getUnlocalizedNameInefficiently_(par1ItemStack);
 	}
 
+	@SideOnly(Side.CLIENT)
 	@Override
-	public void addInformation(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, List par3List, boolean par4) {
+	public void addInformation(@Nonnull ItemStack par1ItemStack, World world, @Nonnull List<String> stacks, @Nonnull ITooltipFlag flag) {
 		String type = getType(par1ItemStack);
 		SubTileSignature sig = BotaniaAPI.getSignatureForName(type);
 
-		sig.addTooltip(par1ItemStack, par2EntityPlayer, par3List);
+		sig.addTooltip(par1ItemStack, world, stacks);
 
 		if(ConfigHandler.referencesEnabled) {
 			String refUnlocalized = sig.getUnlocalizedLoreTextForStack(par1ItemStack);
-			String refLocalized = StatCollector.translateToLocal(refUnlocalized);
+			String refLocalized = I18n.format(refUnlocalized);
 			if(!refLocalized.equals(refUnlocalized))
-				par3List.add(EnumChatFormatting.ITALIC + refLocalized);
+				stacks.add(TextFormatting.ITALIC + refLocalized);
 		}
-
-		String mod = BotaniaAPI.subTileMods.get(type);
-		if(!mod.equals(LibMisc.MOD_ID))
-			par3List.add(EnumChatFormatting.ITALIC + "[" + mod + "]");
 	}
 
+	@Override
+	public String getCreatorModId(ItemStack itemStack) {
+		String mod = BotaniaAPI.subTileMods.get(getType(itemStack));
+		if(mod != null)
+			return mod;
+		return LibMisc.MOD_ID;
+	}
+
+	@Nonnull
 	public static String getType(ItemStack stack) {
-		return ItemNBTHelper.detectNBT(stack) ? ItemNBTHelper.getString(stack, SubTileEntity.TAG_TYPE, "") : "";
+		return stack.hasTagCompound() ? ItemNBTHelper.getString(stack, SubTileEntity.TAG_TYPE, "") : "";
 	}
 
 	public static ItemStack ofType(String type) {
@@ -116,27 +133,24 @@ public class ItemBlockSpecialFlower extends ItemBlockMod implements IRecipeKeyPr
 		return "flower." + getType(stack);
 	}
 
-	@Override
-	public Achievement getAchievementOnPickup(ItemStack stack, EntityPlayer player, EntityItem item) {
-		String type = getType(stack);
-		if(type.equals(LibBlockNames.SUBTILE_DAYBLOOM))
-			return ModAchievements.daybloomPickup;
-		else if(type.equals(LibBlockNames.SUBTILE_ENDOFLAME))
-			return ModAchievements.endoflamePickup;
-		else if(type.equals(LibBlockNames.SUBTILE_KEKIMURUS))
-			return ModAchievements.kekimurusPickup;
-		else if(type.equals(LibBlockNames.SUBTILE_HEISEI_DREAM))
-			return ModAchievements.heiseiDreamPickup;
-		else if(type.equals(LibBlockNames.SUBTILE_POLLIDISIAC))
-			return ModAchievements.pollidisiacPickup;
-		else if(type.equals(LibBlockNames.SUBTILE_BUBBELL))
-			return ModAchievements.bubbellPickup;
-		else if(type.equals(LibBlockNames.SUBTILE_DANDELIFEON))
-			return ModAchievements.dandelifeonPickup;
-		else if(type.equals(""))
-			return ModAchievements.nullFlower;
-		return null;
+	@SubscribeEvent
+	public static void onItemPickup(EntityItemPickupEvent evt) {
+		if(evt.getItem().getItem().getItem() == Item.getItemFromBlock(ModBlocks.specialFlower)) {
+			String type = getType(evt.getItem().getItem());
+			Class subtile = BotaniaAPI.getSubTileMapping(type);
+
+			if(SubTileGenerating.class.isAssignableFrom(subtile)) {
+				PlayerHelper.grantCriterion((EntityPlayerMP) evt.getEntityPlayer(), new ResourceLocation(LibMisc.MOD_ID, "main/generating_flower"), "code_triggered");
+			}
+
+			if(SubTileFunctional.class.isAssignableFrom(subtile)) {
+				PlayerHelper.grantCriterion((EntityPlayerMP) evt.getEntityPlayer(), new ResourceLocation(LibMisc.MOD_ID, "main/functional_flower"), "code_triggered");
+			}
+
+			if("".equals(type)) {
+				PlayerHelper.grantCriterion((EntityPlayerMP) evt.getEntityPlayer(), new ResourceLocation(LibMisc.MOD_ID, "challenge/null_flower"), "code_triggered");
+			}
+		}
 	}
 
 }
-

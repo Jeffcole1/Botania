@@ -2,10 +2,10 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jan 14, 2014, 5:17:55 PM (GMT)]
  */
 package vazkii.botania.common.block;
@@ -16,8 +16,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.IForgeRegistry;
 import vazkii.botania.api.BotaniaAPI;
+import vazkii.botania.api.recipe.RecipeManaInfusion;
 import vazkii.botania.api.subtile.SubTileEntity;
 import vazkii.botania.client.lib.LibResources;
 import vazkii.botania.common.block.corporea.BlockCorporeaCrystalCube;
@@ -25,31 +31,11 @@ import vazkii.botania.common.block.corporea.BlockCorporeaFunnel;
 import vazkii.botania.common.block.corporea.BlockCorporeaIndex;
 import vazkii.botania.common.block.corporea.BlockCorporeaInterceptor;
 import vazkii.botania.common.block.corporea.BlockCorporeaRetainer;
-import vazkii.botania.common.block.decor.BlockBlaze;
-import vazkii.botania.common.block.decor.BlockBuriedPetals;
-import vazkii.botania.common.block.decor.BlockCustomBrick;
-import vazkii.botania.common.block.decor.BlockDirtPath;
-import vazkii.botania.common.block.decor.BlockElfGlass;
-import vazkii.botania.common.block.decor.BlockEndStoneBrick;
-import vazkii.botania.common.block.decor.BlockFloatingFlower;
-import vazkii.botania.common.block.decor.BlockManaBeacon;
-import vazkii.botania.common.block.decor.BlockManaFlame;
-import vazkii.botania.common.block.decor.BlockManaGlass;
-import vazkii.botania.common.block.decor.BlockModMushroom;
-import vazkii.botania.common.block.decor.BlockPetalBlock;
-import vazkii.botania.common.block.decor.BlockPrismarine;
-import vazkii.botania.common.block.decor.BlockReeds;
-import vazkii.botania.common.block.decor.BlockSeaLamp;
-import vazkii.botania.common.block.decor.BlockShimmerrock;
-import vazkii.botania.common.block.decor.BlockShimmerwoodPlanks;
-import vazkii.botania.common.block.decor.BlockShinyFlower;
-import vazkii.botania.common.block.decor.BlockStarfield;
-import vazkii.botania.common.block.decor.BlockThatch;
-import vazkii.botania.common.block.decor.BlockTinyPotato;
-import vazkii.botania.common.block.decor.BlockUnstable;
+import vazkii.botania.common.block.decor.*;
+import vazkii.botania.common.block.dispenser.BehaviourFelPumpkin;
 import vazkii.botania.common.block.dispenser.BehaviourPoolMinecart;
-import vazkii.botania.common.block.dispenser.BehaviourSeeds;
 import vazkii.botania.common.block.dispenser.BehaviourWand;
+import vazkii.botania.common.block.dispenser.SeedBehaviours;
 import vazkii.botania.common.block.mana.BlockAlchemyCatalyst;
 import vazkii.botania.common.block.mana.BlockBellows;
 import vazkii.botania.common.block.mana.BlockBrewery;
@@ -74,37 +60,11 @@ import vazkii.botania.common.block.string.BlockRedStringDispenser;
 import vazkii.botania.common.block.string.BlockRedStringFertilizer;
 import vazkii.botania.common.block.string.BlockRedStringInterceptor;
 import vazkii.botania.common.block.string.BlockRedStringRelay;
-import vazkii.botania.common.block.subtile.SubTileDecor;
 import vazkii.botania.common.block.subtile.SubTileManastar;
 import vazkii.botania.common.block.subtile.SubTilePureDaisy;
-import vazkii.botania.common.block.subtile.functional.SubTileAgricarnation;
-import vazkii.botania.common.block.subtile.functional.SubTileBellethorn;
-import vazkii.botania.common.block.subtile.functional.SubTileBubbell;
-import vazkii.botania.common.block.subtile.functional.SubTileClayconia;
-import vazkii.botania.common.block.subtile.functional.SubTileDaffomill;
-import vazkii.botania.common.block.subtile.functional.SubTileDreadthorn;
-import vazkii.botania.common.block.subtile.functional.SubTileExoflame;
-import vazkii.botania.common.block.subtile.functional.SubTileFallenKanade;
-import vazkii.botania.common.block.subtile.functional.SubTileHeiseiDream;
-import vazkii.botania.common.block.subtile.functional.SubTileHopperhock;
-import vazkii.botania.common.block.subtile.functional.SubTileHyacidus;
-import vazkii.botania.common.block.subtile.functional.SubTileJadedAmaranthus;
-import vazkii.botania.common.block.subtile.functional.SubTileJiyuulia;
-import vazkii.botania.common.block.subtile.functional.SubTileLoonuim;
-import vazkii.botania.common.block.subtile.functional.SubTileMarimorphosis;
-import vazkii.botania.common.block.subtile.functional.SubTileMedumone;
-import vazkii.botania.common.block.subtile.functional.SubTileOrechid;
-import vazkii.botania.common.block.subtile.functional.SubTileOrechidIgnem;
-import vazkii.botania.common.block.subtile.functional.SubTilePollidisiac;
-import vazkii.botania.common.block.subtile.functional.SubTileRannuncarpus;
-import vazkii.botania.common.block.subtile.functional.SubTileSolegnolia;
-import vazkii.botania.common.block.subtile.functional.SubTileSpectranthemum;
-import vazkii.botania.common.block.subtile.functional.SubTileTangleberrie;
-import vazkii.botania.common.block.subtile.functional.SubTileTigerseye;
-import vazkii.botania.common.block.subtile.functional.SubTileVinculotus;
+import vazkii.botania.common.block.subtile.functional.*;
 import vazkii.botania.common.block.subtile.generating.SubTileArcaneRose;
 import vazkii.botania.common.block.subtile.generating.SubTileDandelifeon;
-import vazkii.botania.common.block.subtile.generating.SubTileDaybloom;
 import vazkii.botania.common.block.subtile.generating.SubTileEndoflame;
 import vazkii.botania.common.block.subtile.generating.SubTileEntropinnyum;
 import vazkii.botania.common.block.subtile.generating.SubTileGourmaryllis;
@@ -112,43 +72,11 @@ import vazkii.botania.common.block.subtile.generating.SubTileHydroangeas;
 import vazkii.botania.common.block.subtile.generating.SubTileKekimurus;
 import vazkii.botania.common.block.subtile.generating.SubTileMunchdew;
 import vazkii.botania.common.block.subtile.generating.SubTileNarslimmus;
-import vazkii.botania.common.block.subtile.generating.SubTileNightshade;
 import vazkii.botania.common.block.subtile.generating.SubTileRafflowsia;
+import vazkii.botania.common.block.subtile.generating.SubTileShulkMeNot;
 import vazkii.botania.common.block.subtile.generating.SubTileSpectrolus;
 import vazkii.botania.common.block.subtile.generating.SubTileThermalily;
-import vazkii.botania.common.block.tile.TileAlfPortal;
-import vazkii.botania.common.block.tile.TileAltar;
-import vazkii.botania.common.block.tile.TileAvatar;
-import vazkii.botania.common.block.tile.TileBifrost;
-import vazkii.botania.common.block.tile.TileBrewery;
-import vazkii.botania.common.block.tile.TileCacophonium;
-import vazkii.botania.common.block.tile.TileCell;
-import vazkii.botania.common.block.tile.TileCocoon;
-import vazkii.botania.common.block.tile.TileCraftCrate;
-import vazkii.botania.common.block.tile.TileEnchanter;
-import vazkii.botania.common.block.tile.TileEnderEye;
-import vazkii.botania.common.block.tile.TileFakeAir;
-import vazkii.botania.common.block.tile.TileFloatingFlower;
-import vazkii.botania.common.block.tile.TileFloatingSpecialFlower;
-import vazkii.botania.common.block.tile.TileForestEye;
-import vazkii.botania.common.block.tile.TileGaiaHead;
-import vazkii.botania.common.block.tile.TileHourglass;
-import vazkii.botania.common.block.tile.TileIncensePlate;
-import vazkii.botania.common.block.tile.TileLightRelay;
-import vazkii.botania.common.block.tile.TileManaBeacon;
-import vazkii.botania.common.block.tile.TileManaFlame;
-import vazkii.botania.common.block.tile.TileOpenCrate;
-import vazkii.botania.common.block.tile.TilePlatform;
-import vazkii.botania.common.block.tile.TilePylon;
-import vazkii.botania.common.block.tile.TileRuneAltar;
-import vazkii.botania.common.block.tile.TileSparkChanger;
-import vazkii.botania.common.block.tile.TileSpawnerClaw;
-import vazkii.botania.common.block.tile.TileSpecialFlower;
-import vazkii.botania.common.block.tile.TileStarfield;
-import vazkii.botania.common.block.tile.TileTerraPlate;
-import vazkii.botania.common.block.tile.TileTeruTeruBozu;
-import vazkii.botania.common.block.tile.TileTinyPlanet;
-import vazkii.botania.common.block.tile.TileTinyPotato;
+import vazkii.botania.common.block.tile.*;
 import vazkii.botania.common.block.tile.corporea.TileCorporeaCrystalCube;
 import vazkii.botania.common.block.tile.corporea.TileCorporeaFunnel;
 import vazkii.botania.common.block.tile.corporea.TileCorporeaIndex;
@@ -171,200 +99,296 @@ import vazkii.botania.common.block.tile.string.TileRedStringFertilizer;
 import vazkii.botania.common.block.tile.string.TileRedStringInterceptor;
 import vazkii.botania.common.block.tile.string.TileRedStringRelay;
 import vazkii.botania.common.item.ModItems;
+import vazkii.botania.common.item.block.ItemBlockDreamwood;
+import vazkii.botania.common.item.block.ItemBlockElven;
+import vazkii.botania.common.item.block.ItemBlockFloatingSpecialFlower;
+import vazkii.botania.common.item.block.ItemBlockMod;
+import vazkii.botania.common.item.block.ItemBlockPool;
+import vazkii.botania.common.item.block.ItemBlockSpecialFlower;
+import vazkii.botania.common.item.block.ItemBlockStorage;
+import vazkii.botania.common.item.block.ItemBlockTinyPotato;
+import vazkii.botania.common.item.block.ItemBlockWithMetadataAndName;
 import vazkii.botania.common.lib.LibBlockNames;
+import vazkii.botania.common.lib.LibMisc;
 import vazkii.botania.common.lib.LibOreDict;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.registry.GameRegistry;
 
+@Mod.EventBusSubscriber(modid = LibMisc.MOD_ID)
 public final class ModBlocks {
+	public static final Block flower = new BlockModFlower();
+	public static final Block altar = new BlockAltar();
+	public static final Block livingrock = new BlockLivingrock();
+	public static final Block livingwood = new BlockLivingwood();
+	public static final Block specialFlower = new BlockSpecialFlower();
+	public static final Block spreader = new BlockSpreader();
+	public static final Block pool = new BlockPool();
+	public static final Block runeAltar = new BlockRuneAltar();
+	public static final Block pylon = new BlockPylon();
+	public static final Block pistonRelay = new BlockPistonRelay();
+	public static final Block distributor = new BlockDistributor();
+	public static final Block manaVoid = new BlockManaVoid();
+	public static final Block manaDetector = new BlockManaDetector();
+	public static final Block enchanter = new BlockEnchanter();
+	public static final Block turntable = new BlockTurntable();
+	public static final Block tinyPlanet = new BlockTinyPlanet();
+	public static final Block alchemyCatalyst = new BlockAlchemyCatalyst();
+	public static final Block openCrate = new BlockOpenCrate();
+	public static final Block forestEye = new BlockForestEye();
+	public static final Block storage = new BlockStorage();
+	public static final Block forestDrum = new BlockForestDrum();
+	public static final Block shinyFlower = new BlockShinyFlower();
+	public static final Block platform = new BlockPlatform();
+	public static final Block alfPortal = new BlockAlfPortal();
+	public static final Block dreamwood = new BlockDreamwood();
+	public static final Block conjurationCatalyst = new BlockConjurationCatalyst();
+	public static final Block bifrost = new BlockBifrost();
+	public static final Block solidVines = new BlockSolidVines();
+	public static final Block buriedPetals = new BlockBuriedPetals();
+	public static final Block floatingFlower = new BlockFloatingFlower();
+	public static final Block tinyPotato = new BlockTinyPotato();
+	public static final Block spawnerClaw = new BlockSpawnerClaw();
+	public static final Block customBrick = new BlockCustomBrick();
+	public static final Block enderEye = new BlockEnderEye();
+	public static final Block starfield = new BlockStarfield();
+	public static final Block rfGenerator = new BlockRFGenerator();
+	public static final Block elfGlass = new BlockElfGlass();
+	public static final Block brewery = new BlockBrewery();
+	public static final Block manaGlass = new BlockManaGlass();
+	public static final Block terraPlate = new BlockTerraPlate();
+	public static final Block redStringContainer = new BlockRedStringContainer();
+	public static final Block redStringDispenser = new BlockRedStringDispenser();
+	public static final Block redStringFertilizer = new BlockRedStringFertilizer();
+	public static final Block redStringComparator = new BlockRedStringComparator();
+	public static final Block redStringRelay = new BlockRedStringRelay();
+	public static final Block floatingSpecialFlower = new BlockFloatingSpecialFlower();
+	public static final Block manaFlame = new BlockManaFlame();
+	public static final Block prism = new BlockPrism();
+	public static final Block enchantedSoil = new BlockEnchantedSoil();
+	public static final Block petalBlock = new BlockPetalBlock();
+	public static final Block corporeaIndex = new BlockCorporeaIndex();
+	public static final Block corporeaFunnel = new BlockCorporeaFunnel();
+	public static final Block mushroom = new BlockModMushroom();
+	public static final Block pump = new BlockPump();
+	public static final Block doubleFlower1 = new BlockModDoubleFlower1();
+	public static final Block doubleFlower2 = new BlockModDoubleFlower2();
+	public static final Block fakeAir = new BlockFakeAir();
+	public static final Block blazeBlock = new BlockBlaze();
+	public static final Block corporeaInterceptor = new BlockCorporeaInterceptor();
+	public static final Block corporeaCrystalCube = new BlockCorporeaCrystalCube();
+	public static final Block incensePlate = new BlockIncensePlate();
+	public static final Block hourglass = new BlockHourglass();
+	public static final Block ghostRail = new BlockGhostRail();
+	public static final Block sparkChanger = new BlockSparkChanger();
+	public static final Block root = new BlockRoot();
+	public static final Block felPumpkin = new BlockFelPumpkin();
+	public static final Block cocoon = new BlockCocoon();
+	public static final Block lightRelay = new BlockLightRelay();
+	public static final Block lightLauncher = new BlockLightLauncher();
+	public static final Block manaBomb = new BlockManaBomb();
+	public static final Block cacophonium = new BlockCacophonium();
+	public static final Block bellows = new BlockBellows();
+	public static final Block bifrostPerm = new BlockBifrostPerm();
+	public static final Block cellBlock = new BlockCell();
+	public static final Block redStringInterceptor = new BlockRedStringInterceptor();
+	public static final Block gaiaHead = new BlockGaiaHead();
+	public static final Block corporeaRetainer = new BlockCorporeaRetainer();
+	public static final Block teruTeruBozu = new BlockTeruTeruBozu();
+	public static final Block shimmerrock = new BlockShimmerrock();
+	public static final Block shimmerwoodPlanks = new BlockShimmerwoodPlanks();
+	public static final Block avatar = new BlockAvatar();
+	public static final Block altGrass = new BlockAltGrass();
+	public static final Block animatedTorch = new BlockAnimatedTorch();
 
-	public static Block flower;
-	public static Block altar;
-	public static Block livingrock;
-	public static Block livingwood;
-	public static Block specialFlower;
-	public static Block spreader;
-	public static Block pool;
-	public static Block runeAltar;
-	public static Block unstableBlock;
-	public static Block pylon;
-	public static Block pistonRelay;
-	public static Block distributor;
-	public static Block manaBeacon;
-	public static Block manaVoid;
-	public static Block manaDetector;
-	public static Block enchanter;
-	public static Block turntable;
-	public static Block tinyPlanet;
-	public static Block alchemyCatalyst;
-	public static Block openCrate;
-	public static Block forestEye;
-	public static Block storage;
-	public static Block forestDrum;
-	public static Block shinyFlower;
-	public static Block platform;
-	public static Block alfPortal;
-	public static Block dreamwood;
-	public static Block conjurationCatalyst;
-	public static Block bifrost;
-	public static Block solidVines;
-	public static Block buriedPetals;
-	public static Block prismarine;
-	public static Block seaLamp;
-	public static Block floatingFlower;
-	public static Block tinyPotato;
-	public static Block spawnerClaw;
-	public static Block reedBlock;
-	public static Block thatch;
-	public static Block customBrick;
-	public static Block enderEye;
-	public static Block starfield;
-	public static Block rfGenerator;
-	public static Block elfGlass;
-	public static Block brewery;
-	public static Block manaGlass;
-	public static Block terraPlate;
-	public static Block redStringContainer;
-	public static Block redStringDispenser;
-	public static Block redStringFertilizer;
-	public static Block redStringComparator;
-	public static Block redStringRelay;
-	public static Block floatingSpecialFlower;
-	public static Block manaFlame;
-	public static Block prism;
-	public static Block dirtPath;
-	public static Block enchantedSoil;
-	public static Block petalBlock;
-	public static Block corporeaIndex;
-	public static Block corporeaFunnel;
-	public static Block endStoneBrick;
-	public static Block mushroom;
-	public static Block pump;
-	public static Block doubleFlower1;
-	public static Block doubleFlower2;
-	public static Block fakeAir;
-	public static Block blazeBlock;
-	public static Block corporeaInterceptor;
-	public static Block corporeaCrystalCube;
-	public static Block incensePlate;
-	public static Block hourglass;
-	public static Block ghostRail;
-	public static Block sparkChanger;
-	public static Block root;
-	public static Block felPumpkin;
-	public static Block cocoon;
-	public static Block lightRelay;
-	public static Block lightLauncher;
-	public static Block manaBomb;
-	public static Block cacophonium;
-	public static Block bellows;
-	public static Block bifrostPerm;
-	public static Block cellBlock;
-	public static Block redStringInterceptor;
-	public static Block gaiaHead;
-	public static Block corporeaRetainer;
-	public static Block teruTeruBozu;
-	public static Block shimmerrock;
-	public static Block shimmerwoodPlanks;
-	public static Block avatar;
-	public static Block altGrass;
+	@SubscribeEvent
+	public static void registerBlocks(RegistryEvent.Register<Block> evt) {
+		IForgeRegistry<Block> r = evt.getRegistry();
 
-	public static void init() {
-		flower = new BlockModFlower();
-		altar = new BlockAltar();
-		livingrock = new BlockLivingrock();
-		livingwood = new BlockLivingwood();
-		specialFlower = new BlockSpecialFlower();
-		spreader = new BlockSpreader();
-		pool = new BlockPool();
-		runeAltar = new BlockRuneAltar();
-		unstableBlock = new BlockUnstable();
-		pylon = new BlockPylon();
-		pistonRelay = new BlockPistonRelay();
-		distributor = new BlockDistributor();
-		manaBeacon = new BlockManaBeacon();
-		manaVoid = new BlockManaVoid();
-		manaDetector = new BlockManaDetector();
-		enchanter = new BlockEnchanter();
-		turntable = new BlockTurntable();
-		tinyPlanet = new BlockTinyPlanet();
-		alchemyCatalyst = new BlockAlchemyCatalyst();
-		openCrate = new BlockOpenCrate();
-		forestEye = new BlockForestEye();
-		storage = new BlockStorage();
-		forestDrum = new BlockForestDrum();
-		shinyFlower = new BlockShinyFlower();
-		platform = new BlockPlatform();
-		alfPortal = new BlockAlfPortal();
-		dreamwood = new BlockDreamwood();
-		conjurationCatalyst = new BlockConjurationCatalyst();
-		bifrost = new BlockBifrost();
-		solidVines = new BlockSolidVines();
-		buriedPetals = new BlockBuriedPetals();
-		prismarine = new BlockPrismarine();
-		seaLamp = new BlockSeaLamp();
-		floatingFlower = new BlockFloatingFlower();
-		tinyPotato = new BlockTinyPotato();
-		spawnerClaw = new BlockSpawnerClaw();
-		reedBlock = new BlockReeds();
-		thatch = new BlockThatch();
-		customBrick = new BlockCustomBrick();
-		enderEye = new BlockEnderEye();
-		starfield = new BlockStarfield();
-		rfGenerator	= new BlockRFGenerator();
-		elfGlass = new BlockElfGlass();
-		brewery = new BlockBrewery();
-		manaGlass = new BlockManaGlass();
-		terraPlate = new BlockTerraPlate();
-		redStringContainer = new BlockRedStringContainer();
-		redStringDispenser = new BlockRedStringDispenser();
-		redStringFertilizer = new BlockRedStringFertilizer();
-		redStringComparator = new BlockRedStringComparator();
-		redStringRelay = new BlockRedStringRelay();
-		floatingSpecialFlower = new BlockFloatingSpecialFlower();
-		manaFlame = new BlockManaFlame();
-		prism = new BlockPrism();
-		dirtPath = new BlockDirtPath();
-		enchantedSoil = new BlockEnchantedSoil();
-		petalBlock = new BlockPetalBlock();
-		corporeaIndex = new BlockCorporeaIndex();
-		corporeaFunnel = new BlockCorporeaFunnel();
-		endStoneBrick = new BlockEndStoneBrick();
-		mushroom = new BlockModMushroom();
-		pump = new BlockPump();
-		doubleFlower1 = new BlockModDoubleFlower(false);
-		doubleFlower2 = new BlockModDoubleFlower(true);
-		fakeAir = new BlockFakeAir();
-		blazeBlock = new BlockBlaze();
-		corporeaInterceptor = new BlockCorporeaInterceptor();
-		corporeaCrystalCube = new BlockCorporeaCrystalCube();
-		incensePlate = new BlockIncensePlate();
-		hourglass = new BlockHourglass();
-		ghostRail = new BlockGhostRail();
-		sparkChanger = new BlockSparkChanger();
-		root = new BlockRoot();
-		felPumpkin = new BlockFelPumpkin();
-		cocoon = new BlockCocoon();
-		lightRelay = new BlockLightRelay();
-		lightLauncher = new BlockLightLauncher();
-		manaBomb = new BlockManaBomb();
-		cacophonium = new BlockCacophonium();
-		bellows = new BlockBellows();
-		bifrostPerm = new BlockBifrostPerm();
-		cellBlock = new BlockCell();
-		redStringInterceptor = new BlockRedStringInterceptor();
-		gaiaHead = new BlockGaiaHead();
-		corporeaRetainer = new BlockCorporeaRetainer();
-		teruTeruBozu = new BlockTeruTeruBozu();
-		shimmerrock = new BlockShimmerrock();
-		shimmerwoodPlanks = new BlockShimmerwoodPlanks();
-		avatar = new BlockAvatar();
-		altGrass = new BlockAltGrass();
+		r.register(flower);
+		r.register(altar);
+		r.register(livingrock);
+		r.register(livingwood);
+		r.register(specialFlower);
+		r.register(spreader);
+		r.register(pool);
+		r.register(runeAltar);
+		r.register(pylon);
+		r.register(pistonRelay);
+		r.register(distributor);
+		r.register(manaVoid);
+		r.register(manaDetector);
+		r.register(enchanter);
+		r.register(turntable);
+		r.register(tinyPlanet);
+		r.register(alchemyCatalyst);
+		r.register(openCrate);
+		r.register(forestEye);
+		r.register(storage);
+		r.register(forestDrum);
+		r.register(shinyFlower);
+		r.register(platform);
+		r.register(alfPortal);
+		r.register(dreamwood);
+		r.register(conjurationCatalyst);
+		r.register(bifrost);
+		r.register(solidVines);
+		r.register(buriedPetals);
+		r.register(floatingFlower);
+		r.register(tinyPotato);
+		r.register(spawnerClaw);
+		r.register(customBrick);
+		r.register(enderEye);
+		r.register(starfield);
+		r.register(rfGenerator);
+		r.register(elfGlass);
+		r.register(brewery);
+		r.register(manaGlass);
+		r.register(terraPlate);
+		r.register(redStringContainer);
+		r.register(redStringDispenser);
+		r.register(redStringFertilizer);
+		r.register(redStringComparator);
+		r.register(redStringRelay);
+		r.register(floatingSpecialFlower);
+		r.register(manaFlame);
+		r.register(prism);
+		r.register(enchantedSoil);
+		r.register(petalBlock);
+		r.register(corporeaIndex);
+		r.register(corporeaFunnel);
+		r.register(mushroom);
+		r.register(pump);
+		r.register(doubleFlower1);
+		r.register(doubleFlower2);
+		r.register(fakeAir);
+		r.register(blazeBlock);
+		r.register(corporeaInterceptor);
+		r.register(corporeaCrystalCube);
+		r.register(incensePlate);
+		r.register(hourglass);
+		r.register(ghostRail);
+		r.register(sparkChanger);
+		r.register(root);
+		r.register(felPumpkin);
+		r.register(cocoon);
+		r.register(lightRelay);
+		r.register(lightLauncher);
+		r.register(manaBomb);
+		r.register(cacophonium);
+		r.register(bellows);
+		r.register(bifrostPerm);
+		r.register(cellBlock);
+		r.register(redStringInterceptor);
+		r.register(gaiaHead);
+		r.register(corporeaRetainer);
+		r.register(teruTeruBozu);
+		r.register(shimmerrock);
+		r.register(shimmerwoodPlanks);
+		r.register(avatar);
+		r.register(altGrass);
+		r.register(animatedTorch);
 
-		ModFluffBlocks.init();
+		RecipeManaInfusion.alchemyState = alchemyCatalyst.getDefaultState();
+		RecipeManaInfusion.conjurationState = conjurationCatalyst.getDefaultState();
+	}
 
-		for(int i = 0; i < 16; i++)
+	@SubscribeEvent
+	public static void registerItemBlocks(RegistryEvent.Register<Item> evt) {
+		IForgeRegistry<Item> r = evt.getRegistry();
+		r.register(new ItemBlockWithMetadataAndName(flower).setRegistryName(flower.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(altar).setRegistryName(altar.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(livingrock).setRegistryName(livingrock.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(livingwood).setRegistryName(livingwood.getRegistryName()));
+		r.register(new ItemBlockSpecialFlower(specialFlower).setRegistryName(specialFlower.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(spreader).setRegistryName(spreader.getRegistryName()));
+		r.register(new ItemBlockPool(pool).setRegistryName(pool.getRegistryName()));
+		r.register(new ItemBlockMod(runeAltar).setRegistryName(runeAltar.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(pylon).setRegistryName(pylon.getRegistryName()));
+		r.register(new ItemBlockMod(pistonRelay).setRegistryName(pistonRelay.getRegistryName()));
+		r.register(new ItemBlockMod(distributor).setRegistryName(distributor.getRegistryName()));
+		r.register(new ItemBlockMod(manaVoid).setRegistryName(manaVoid.getRegistryName()));
+		r.register(new ItemBlockMod(manaDetector).setRegistryName(manaDetector.getRegistryName()));
+		r.register(new ItemBlockMod(enchanter).setRegistryName(enchanter.getRegistryName()));
+		r.register(new ItemBlockMod(turntable).setRegistryName(turntable.getRegistryName()));
+		r.register(new ItemBlockMod(tinyPlanet).setRegistryName(tinyPlanet.getRegistryName()));
+		r.register(new ItemBlockMod(alchemyCatalyst).setRegistryName(alchemyCatalyst.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(openCrate).setRegistryName(openCrate.getRegistryName()));
+		r.register(new ItemBlockMod(forestEye).setRegistryName(forestEye.getRegistryName()));
+		r.register(new ItemBlockStorage(storage).setRegistryName(storage.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(forestDrum).setRegistryName(forestDrum.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(shinyFlower).setRegistryName(shinyFlower.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(platform).setRegistryName(platform.getRegistryName()));
+		r.register(new ItemBlockMod(alfPortal).setRegistryName(alfPortal.getRegistryName()));
+		r.register(new ItemBlockDreamwood(dreamwood).setRegistryName(dreamwood.getRegistryName()));
+		r.register(new ItemBlockMod(conjurationCatalyst).setRegistryName(conjurationCatalyst.getRegistryName()));
+		r.register(new ItemBlockMod(bifrost).setRegistryName(bifrost.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(floatingFlower).setRegistryName(floatingFlower.getRegistryName()));
+		r.register(new ItemBlockTinyPotato(tinyPotato).setRegistryName(tinyPotato.getRegistryName()));
+		r.register(new ItemBlockMod(spawnerClaw).setRegistryName(spawnerClaw.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(customBrick).setRegistryName(customBrick.getRegistryName()));
+		r.register(new ItemBlockMod(enderEye).setRegistryName(enderEye.getRegistryName()));
+		r.register(new ItemBlockMod(starfield).setRegistryName(starfield.getRegistryName()));
+		r.register(new ItemBlockMod(rfGenerator).setRegistryName(rfGenerator.getRegistryName()));
+		r.register(new ItemBlockElven(elfGlass).setRegistryName(elfGlass.getRegistryName()));
+		r.register(new ItemBlockMod(brewery).setRegistryName(brewery.getRegistryName()));
+		r.register(new ItemBlockMod(manaGlass).setRegistryName(manaGlass.getRegistryName()));
+		r.register(new ItemBlockMod(terraPlate).setRegistryName(terraPlate.getRegistryName()));
+		r.register(new ItemBlockMod(redStringContainer).setRegistryName(redStringContainer.getRegistryName()));
+		r.register(new ItemBlockMod(redStringDispenser).setRegistryName(redStringDispenser.getRegistryName()));
+		r.register(new ItemBlockMod(redStringFertilizer).setRegistryName(redStringFertilizer.getRegistryName()));
+		r.register(new ItemBlockMod(redStringComparator).setRegistryName(redStringComparator.getRegistryName()));
+		r.register(new ItemBlockMod(redStringRelay).setRegistryName(redStringRelay.getRegistryName()));
+		r.register(new ItemBlockFloatingSpecialFlower(floatingSpecialFlower).setRegistryName(floatingSpecialFlower.getRegistryName()));
+		r.register(new ItemBlockMod(prism).setRegistryName(prism.getRegistryName()));
+		r.register(new ItemBlockMod(enchantedSoil).setRegistryName(enchantedSoil.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(petalBlock).setRegistryName(petalBlock.getRegistryName()));
+		r.register(new ItemBlockMod(corporeaIndex).setRegistryName(corporeaIndex.getRegistryName()));
+		r.register(new ItemBlockMod(corporeaFunnel).setRegistryName(corporeaFunnel.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(mushroom).setRegistryName(mushroom.getRegistryName()));
+		r.register(new ItemBlockMod(pump).setRegistryName(pump.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(doubleFlower1).setRegistryName(doubleFlower1.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(doubleFlower2).setRegistryName(doubleFlower2.getRegistryName()));
+		r.register(new ItemBlockBlaze(blazeBlock).setRegistryName(blazeBlock.getRegistryName()));
+		r.register(new ItemBlockMod(corporeaInterceptor).setRegistryName(corporeaInterceptor.getRegistryName()));
+		r.register(new ItemBlockMod(corporeaCrystalCube).setRegistryName(corporeaCrystalCube.getRegistryName()));
+		r.register(new ItemBlockMod(incensePlate).setRegistryName(incensePlate.getRegistryName()));
+		r.register(new ItemBlockMod(hourglass).setRegistryName(hourglass.getRegistryName()));
+		r.register(new ItemBlockMod(ghostRail).setRegistryName(ghostRail.getRegistryName()));
+		r.register(new ItemBlockMod(sparkChanger).setRegistryName(sparkChanger.getRegistryName()));
+		r.register(new ItemBlockMod(root).setRegistryName(root.getRegistryName()));
+		r.register(new ItemBlockMod(felPumpkin).setRegistryName(felPumpkin.getRegistryName()));
+		r.register(new ItemBlockMod(cocoon).setRegistryName(cocoon.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(lightRelay).setRegistryName(lightRelay.getRegistryName()));
+		r.register(new ItemBlockMod(lightLauncher).setRegistryName(lightLauncher.getRegistryName()));
+		r.register(new ItemBlockMod(manaBomb).setRegistryName(manaBomb.getRegistryName()));
+		r.register(new ItemBlockMod(cacophonium).setRegistryName(cacophonium.getRegistryName()));
+		r.register(new ItemBlockMod(bellows).setRegistryName(bellows.getRegistryName()));
+		r.register(new ItemBlockMod(bifrostPerm).setRegistryName(bifrostPerm.getRegistryName()));
+		r.register(new ItemBlockMod(cellBlock).setRegistryName(cellBlock.getRegistryName()));
+		r.register(new ItemBlockMod(redStringInterceptor).setRegistryName(redStringInterceptor.getRegistryName()));
+		r.register(new ItemBlockMod(corporeaRetainer).setRegistryName(corporeaRetainer.getRegistryName()));
+		r.register(new ItemBlockMod(teruTeruBozu).setRegistryName(teruTeruBozu.getRegistryName()));
+		r.register(new ItemBlockMod(shimmerrock).setRegistryName(shimmerrock.getRegistryName()));
+		r.register(new ItemBlockMod(shimmerwoodPlanks).setRegistryName(shimmerwoodPlanks.getRegistryName()));
+		r.register(new ItemBlockMod(avatar).setRegistryName(avatar.getRegistryName()));
+		r.register(new ItemBlockWithMetadataAndName(altGrass).setRegistryName(altGrass.getRegistryName()));
+		r.register(new ItemBlockMod(animatedTorch).setRegistryName(animatedTorch.getRegistryName()));
+		initOreDict();
+
+		initTileEntities();
+	}
+
+	public static void addDispenserBehaviours() {
+		BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(ModItems.twigWand, new BehaviourWand());
+		BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(ModItems.poolMinecart, new BehaviourPoolMinecart());
+		BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Item.getItemFromBlock(ModBlocks.felPumpkin), new BehaviourFelPumpkin());
+
+		SeedBehaviours.init();
+	}
+	
+	private static void initOreDict() {
+		for(int i = 0; i < 16; i++) {
 			OreDictionary.registerOre(LibOreDict.FLOWER[i], new ItemStack(flower, 1, i));
+			OreDictionary.registerOre(LibOreDict.PETAL[i], new ItemStack(mushroom, 1, i));
+		}
 
 		OreDictionary.registerOre(LibOreDict.LIVING_ROCK, livingrock);
 		OreDictionary.registerOre(LibOreDict.LIVING_WOOD, livingwood);
@@ -375,39 +399,16 @@ public final class ModBlocks {
 			OreDictionary.registerOre(LibOreDict.DOUBLE_FLOWER[i + 8], new ItemStack(doubleFlower2, 1, i));
 		}
 
-		OreDictionary.registerOre(LibOreDict.PRISMARINE_BLOCK, new ItemStack(prismarine, 1, OreDictionary.WILDCARD_VALUE));
 		OreDictionary.registerOre(LibOreDict.BLAZE_BLOCK, blazeBlock);
 
-		for(int i = 0; i < 16; i++)
-			OreDictionary.registerOre(LibOreDict.STONE_18_VARIANTS[i], new ItemStack(ModFluffBlocks.stone, 1, i));
-
 		// Vanilla OreDict entries
-		OreDictionary.registerOre("dirt", Blocks.dirt);
-		OreDictionary.registerOre("grass", Blocks.grass);
-		OreDictionary.registerOre("sand", Block.getBlockFromName("sand"));
-		OreDictionary.registerOre("gravel", Block.getBlockFromName("gravel"));
-		OreDictionary.registerOre("hardenedClay", new ItemStack(Blocks.hardened_clay, 1, OreDictionary.WILDCARD_VALUE));
-		OreDictionary.registerOre("snowLayer", Blocks.snow_layer);
-		OreDictionary.registerOre("mycelium", Blocks.mycelium);
-		OreDictionary.registerOre("podzol", new ItemStack(Blocks.dirt, 1, 2));
-		OreDictionary.registerOre("netherrack", Blocks.netherrack);
-		OreDictionary.registerOre("soulSand", Blocks.soul_sand);
-		OreDictionary.registerOre("ice", Blocks.ice);
-		OreDictionary.registerOre("slabCobblestone", new ItemStack(Blocks.stone_slab, 1, 3));
-		OreDictionary.registerOre("chestWood", Blocks.chest);
-		OreDictionary.registerOre("craftingTableWood", Blocks.crafting_table);
-
-		BotaniaAPI.registerPaintableBlock(unstableBlock);
-		BotaniaAPI.registerPaintableBlock(manaBeacon);
-
-		initTileEntities();
-	}
-
-	public static void addDispenserBehaviours() {
-		for(Item seed : BotaniaAPI.seeds.keySet())
-			BlockDispenser.dispenseBehaviorRegistry.putObject(seed, new BehaviourSeeds(BotaniaAPI.seeds.get(seed)));
-		BlockDispenser.dispenseBehaviorRegistry.putObject(ModItems.twigWand, new BehaviourWand());
-		BlockDispenser.dispenseBehaviorRegistry.putObject(ModItems.poolMinecart, new BehaviourPoolMinecart());
+		OreDictionary.registerOre("hardenedClay", new ItemStack(Blocks.HARDENED_CLAY, 1, OreDictionary.WILDCARD_VALUE));
+		OreDictionary.registerOre("snowLayer", Blocks.SNOW_LAYER);
+		OreDictionary.registerOre("mycelium", Blocks.MYCELIUM);
+		OreDictionary.registerOre("podzol", new ItemStack(Blocks.DIRT, 1, 2));
+		OreDictionary.registerOre("soulSand", Blocks.SOUL_SAND);
+		OreDictionary.registerOre("ice", Blocks.ICE);
+		OreDictionary.registerOre("slabCobblestone", new ItemStack(Blocks.STONE_SLAB, 1, 3));
 	}
 
 	private static void initTileEntities() {
@@ -418,7 +419,6 @@ public final class ModBlocks {
 		registerTile(TileRuneAltar.class, LibBlockNames.RUNE_ALTAR);
 		registerTile(TilePylon.class, LibBlockNames.PYLON);
 		registerTile(TileDistributor.class, LibBlockNames.DISTRIBUTOR);
-		registerTile(TileManaBeacon.class, LibBlockNames.MANA_BEACON);
 		registerTile(TileManaVoid.class, LibBlockNames.MANA_VOID);
 		registerTile(TileManaDetector.class, LibBlockNames.MANA_DETECTOR);
 		registerTile(TileEnchanter.class, LibBlockNames.ENCHANTER);
@@ -465,17 +465,14 @@ public final class ModBlocks {
 		registerTile(TileCorporeaRetainer.class, LibBlockNames.CORPOREA_RETAINER);
 		registerTile(TileTeruTeruBozu.class, LibBlockNames.TERU_TERU_BOZU);
 		registerTile(TileAvatar.class, LibBlockNames.AVATAR);
+		registerTile(TileAnimatedTorch.class, LibBlockNames.ANIMATED_TORCH);
 
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_PUREDAISY, SubTilePureDaisy.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_MANASTAR, SubTileManastar.class);
 
-		registerSubTileWithDecor(LibBlockNames.SUBTILE_DAYBLOOM, SubTileDaybloom.class, SubTileDecor.Daybloom.class);
-		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_DAYBLOOM_PRIME, SubTileDaybloom.Prime.class);
+		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_HYDROANGEAS, SubTileHydroangeas.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_ENDOFLAME, SubTileEndoflame.class);
-		registerSubTileWithDecor(LibBlockNames.SUBTILE_HYDROANGEAS, SubTileHydroangeas.class, SubTileDecor.Hydroangeas.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_THERMALILY, SubTileThermalily.class);
-		registerSubTileWithDecor(LibBlockNames.SUBTILE_NIGHTSHADE, SubTileNightshade.class, SubTileDecor.Nightshade.class);
-		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_NIGHTSHADE_PRIME, SubTileNightshade.Prime.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_ARCANE_ROSE, SubTileArcaneRose.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_MUNCHDEW, SubTileMunchdew.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_ENTROPINNYUM, SubTileEntropinnyum.class);
@@ -485,6 +482,7 @@ public final class ModBlocks {
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_SPECTROLUS, SubTileSpectrolus.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_DANDELIFEON, SubTileDandelifeon.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_RAFFLOWSIA, SubTileRafflowsia.class);
+		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_SHULK_ME_NOT, SubTileShulkMeNot.class);
 
 		registerSubTileWithMini(LibBlockNames.SUBTILE_BELLETHORN, SubTileBellethorn.class);
 		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_DREADTHORN, SubTileDreadthorn.class);
@@ -511,15 +509,7 @@ public final class ModBlocks {
 		registerSubTileWithMini(LibBlockNames.SUBTILE_MARIMORPHOSIS, SubTileMarimorphosis.class);
 		registerSubTileWithMini(LibBlockNames.SUBTILE_BUBBELL, SubTileBubbell.class);
 		registerSubTileWithMini(LibBlockNames.SUBTILE_SOLEGNOLIA, SubTileSolegnolia.class);
-	}
-
-	public static void registerMultiparts() {
-		if(Loader.isModLoaded("ForgeMultipart")) {
-			try {
-				Class clazz = Class.forName("vazkii.botania.common.integration.multipart.MultipartHandler");
-				clazz.newInstance();
-			} catch(Throwable e) {}
-		}
+		BotaniaAPI.registerSubTile(LibBlockNames.SUBTILE_BERGAMUTE, SubTileBergamute.class);
 	}
 
 	private static void registerSubTileWithMini(String key, Class<? extends SubTileEntity> clazz) {
@@ -528,11 +518,6 @@ public final class ModBlocks {
 		for(Class innerClazz : clazz.getDeclaredClasses())
 			if(innerClazz.getSimpleName().equals("Mini"))
 				BotaniaAPI.registerMiniSubTile(key + "Chibi", innerClazz, key);
-	}
-
-	private static void registerSubTileWithDecor(String key, Class<? extends SubTileEntity> clazz, Class<? extends SubTileEntity> decor) {
-		BotaniaAPI.registerSubTile(key, clazz);
-		BotaniaAPI.registerMiniSubTile(key + "Decor", decor, key);
 	}
 
 	private static void registerTile(Class<? extends TileEntity> clazz, String key) {
