@@ -2,57 +2,56 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Mar 29, 2015, 10:13:41 PM (GMT)]
  */
 package vazkii.botania.common.item.relic;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import baubles.api.BaubleType;
+import baubles.api.BaublesApi;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.items.IItemHandler;
 import vazkii.botania.common.core.handler.ConfigHandler;
 import vazkii.botania.common.item.ModItems;
 import vazkii.botania.common.lib.LibItemNames;
-import baubles.api.BaubleType;
-import baubles.common.container.InventoryBaubles;
-import baubles.common.lib.PlayerHandler;
+import vazkii.botania.common.lib.LibMisc;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.List;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-
+@Mod.EventBusSubscriber(modid = LibMisc.MOD_ID)
 public class ItemOdinRing extends ItemRelicBauble {
 
-	public static List<String> damageNegations = new ArrayList();
-
-	Multimap<String, AttributeModifier> attributes = HashMultimap.create();
+	private static final List<String> damageNegations = new ArrayList<>();
 
 	public ItemOdinRing() {
 		super(LibItemNames.ODIN_RING);
-		MinecraftForge.EVENT_BUS.register(this);
 
-		damageNegations.add(DamageSource.drown.damageType);
-		damageNegations.add(DamageSource.fall.damageType);
-		damageNegations.add(DamageSource.lava.damageType);
+		damageNegations.add(DamageSource.DROWN.damageType);
+		damageNegations.add(DamageSource.FALL.damageType);
+		damageNegations.add(DamageSource.LAVA.damageType);
 		if(ConfigHandler.ringOfOdinFireResist) {
-			damageNegations.add(DamageSource.inFire.damageType);
-			damageNegations.add(DamageSource.onFire.damageType);
+			damageNegations.add(DamageSource.IN_FIRE.damageType);
+			damageNegations.add(DamageSource.ON_FIRE.damageType);
 		}
 
-		damageNegations.add(DamageSource.inWall.damageType);
-		damageNegations.add(DamageSource.starve.damageType);
+		damageNegations.add(DamageSource.IN_WALL.damageType);
+		damageNegations.add(DamageSource.STARVE.damageType);
 	}
 
 	@Override
@@ -62,10 +61,10 @@ public class ItemOdinRing extends ItemRelicBauble {
 	}
 
 	@SubscribeEvent
-	public void onPlayerAttacked(LivingAttackEvent event) {
-		if(event.entityLiving instanceof EntityPlayer) {
-			EntityPlayer player = (EntityPlayer) event.entityLiving;
-			if(getOdinRing(player) != null && damageNegations.contains(event.source.damageType))
+	public static void onPlayerAttacked(LivingAttackEvent event) {
+		if(event.getEntityLiving() instanceof EntityPlayer) {
+			EntityPlayer player = (EntityPlayer) event.getEntityLiving();
+			if(getOdinRing(player) != null && damageNegations.contains(event.getSource().damageType))
 				event.setCanceled(true);
 		}
 	}
@@ -76,33 +75,44 @@ public class ItemOdinRing extends ItemRelicBauble {
 	}
 
 	public static ItemStack getOdinRing(EntityPlayer player) {
-		InventoryBaubles baubles = PlayerHandler.getPlayerBaubles(player);
+		IItemHandler baubles = BaublesApi.getBaublesHandler(player);
 		ItemStack stack1 = baubles.getStackInSlot(1);
 		ItemStack stack2 = baubles.getStackInSlot(2);
 		return isOdinRing(stack1) ? stack1 : isOdinRing(stack2) ? stack2 : null;
 	}
 
 	private static boolean isOdinRing(ItemStack stack) {
-		return stack != null && (stack.getItem() == ModItems.odinRing || stack.getItem() == ModItems.aesirRing);
+		return !stack.isEmpty() && stack.getItem() == ModItems.odinRing;
 	}
 
 	@Override
 	public void onEquippedOrLoadedIntoWorld(ItemStack stack, EntityLivingBase player) {
-		attributes.clear();
-		fillModifiers(attributes, stack);
-		player.getAttributeMap().applyAttributeModifiers(attributes);
+		if(!player.world.isRemote) {
+			Multimap<String, AttributeModifier> attributes = HashMultimap.create();
+			fillModifiers(attributes, stack);
+			player.getAttributeMap().applyAttributeModifiers(attributes);
+		}
 	}
 
 	@Override
 	public void onUnequipped(ItemStack stack, EntityLivingBase player) {
-		attributes.clear();
-		fillModifiers(attributes, stack);
-		player.getAttributeMap().removeAttributeModifiers(attributes);
+		if(!player.world.isRemote) {
+			Multimap<String, AttributeModifier> attributes = HashMultimap.create();
+			fillModifiers(attributes, stack);
+			player.getAttributeMap().removeAttributeModifiers(attributes);
+		}
 	}
 
+	private void fillModifiers(Multimap<String, AttributeModifier> attributes, ItemStack stack) {
+		if(stack.isEmpty()) // workaround for Azanor/Baubles#156
+			return;
+		
+		attributes.put(SharedMonsterAttributes.MAX_HEALTH.getName(), new AttributeModifier(getBaubleUUID(stack), "Odin Ring", 20, 0).setSaved(false));
+	}
 
-	void fillModifiers(Multimap<String, AttributeModifier> attributes, ItemStack stack) {
-		attributes.put(SharedMonsterAttributes.maxHealth.getAttributeUnlocalizedName(), new AttributeModifier(getBaubleUUID(stack), "Bauble modifier", 20, 0));
+	@Override
+	public ResourceLocation getAdvancement() {
+		return new ResourceLocation(LibMisc.MOD_ID, "challenge/odin_ring");
 	}
 
 }

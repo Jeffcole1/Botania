@@ -2,30 +2,31 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [May 17, 2014, 3:16:36 PM (GMT)]
  */
 package vazkii.botania.common.item.equipment.bauble;
 
-import java.util.Arrays;
-import java.util.List;
-
-import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import baubles.api.BaubleType;
+import baubles.api.BaublesApi;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.items.IItemHandler;
 import vazkii.botania.api.BotaniaAPI;
 import vazkii.botania.api.item.IRelic;
 import vazkii.botania.api.mana.IManaItem;
-import vazkii.botania.client.core.helper.IconHelper;
 import vazkii.botania.common.Botania;
 import vazkii.botania.common.block.subtile.functional.SubTileSolegnolia;
 import vazkii.botania.common.core.handler.ConfigHandler;
@@ -33,24 +34,16 @@ import vazkii.botania.common.core.helper.ItemNBTHelper;
 import vazkii.botania.common.core.helper.MathHelper;
 import vazkii.botania.common.core.helper.Vector3;
 import vazkii.botania.common.lib.LibItemNames;
-import baubles.api.BaubleType;
-import baubles.common.container.InventoryBaubles;
-import baubles.common.lib.PlayerHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import java.util.List;
 
 public class ItemMagnetRing extends ItemBauble {
 
-	IIcon iconOff;
-
 	private static final String TAG_COOLDOWN = "cooldown";
 
-	private static final List<String> BLACKLIST = Arrays.asList(new String[] {
-			"appliedenergistics2:item.ItemCrystalSeed",
-	});
+	private static final List<ResourceLocation> BLACKLIST = Lists.newArrayList(new ResourceLocation("appliedenergistics2", "crystal_seed"));
 
-	int range;
+	private final int range;
 
 	public ItemMagnetRing() {
 		this(LibItemNames.MAGNET_RING, 6);
@@ -60,29 +53,17 @@ public class ItemMagnetRing extends ItemBauble {
 	public ItemMagnetRing(String name, int range) {
 		super(name);
 		this.range = range;
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IIconRegister par1IconRegister) {
-		itemIcon = IconHelper.forItem(par1IconRegister, this, 0);
-		iconOff = IconHelper.forItem(par1IconRegister, this, 1);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIconIndex(ItemStack stack) {
-		return getCooldown(stack) <= 0 ? itemIcon : iconOff;
+		addPropertyOverride(new ResourceLocation("botania", "on"), (stack, worldIn, entityIn) -> ItemMagnetRing.getCooldown(stack) <= 0 ? 1 : 0);
 	}
 
 	@SubscribeEvent
 	public void onTossItem(ItemTossEvent event) {
-		InventoryBaubles inv = PlayerHandler.getPlayerBaubles(event.player);
-		for(int i = 0; i < inv.getSizeInventory(); i++) {
+		IItemHandler inv = BaublesApi.getBaublesHandler(event.getPlayer());
+		for(int i = 0; i < inv.getSlots(); i++) {
 			ItemStack stack = inv.getStackInSlot(i);
-			if(stack != null && stack.getItem() instanceof ItemMagnetRing) {
+			if(!stack.isEmpty() && stack.getItem() instanceof ItemMagnetRing) {
 				setCooldown(stack, 100);
-				BotaniaAPI.internalHandler.sendBaubleUpdatePacket(event.player, i);
+				BotaniaAPI.internalHandler.sendBaubleUpdatePacket(event.getPlayer(), i);
 			}
 		}
 	}
@@ -102,10 +83,10 @@ public class ItemMagnetRing extends ItemBauble {
 		if(cooldown <= 0) {
 			if(player.isSneaking() == ConfigHandler.invertMagnetRing) {
 				double x = player.posX;
-				double y = player.posY -(player.worldObj.isRemote ? 1.62 : 0) + 0.75;
+				double y = player.posY + 0.75;
 				double z = player.posZ;
 
-				List<EntityItem> items = player.worldObj.getEntitiesWithinAABB(EntityItem.class, AxisAlignedBB.getBoundingBox(x - range, y - range, z - range, x + range, y + range, z + range));
+				List<EntityItem> items = player.world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(x - range, y - range, z - range, x + range, y + range, z + range));
 				int pulled = 0;
 				for(EntityItem item : items)
 					if(canPullItem(item)) {
@@ -113,9 +94,9 @@ public class ItemMagnetRing extends ItemBauble {
 							break;
 
 						MathHelper.setEntityMotionFromVector(item, new Vector3(x, y, z), 0.45F);
-						if(player.worldObj.isRemote) {
-							boolean red = player.worldObj.rand.nextBoolean();
-							Botania.proxy.sparkleFX(player.worldObj, item.posX, item.posY, item.posZ, red ? 1F : 0F, 0F, red ? 0F : 1F, 1F, 3);
+						if(player.world.isRemote) {
+							boolean red = player.world.rand.nextBoolean();
+							Botania.proxy.sparkleFX(item.posX, item.posY, item.posZ, red ? 1F : 0F, 0F, red ? 0F : 1F, 1F, 3);
 						}
 						pulled++;
 					}
@@ -124,26 +105,19 @@ public class ItemMagnetRing extends ItemBauble {
 	}
 
 	private boolean canPullItem(EntityItem item) {
-		if(item.isDead || SubTileSolegnolia.hasSolegnoliaAround(item))
+		if(item.isDead || item.pickupDelay >= 40 || SubTileSolegnolia.hasSolegnoliaAround(item))
 			return false;
 
-		ItemStack stack = item.getEntityItem();
-		if(stack == null || stack.getItem() instanceof IManaItem || stack.getItem() instanceof IRelic || BLACKLIST.contains(itemRegistry.getNameForObject(stack.getItem())) || BotaniaAPI.isItemBlacklistedFromMagnet(stack))
+		ItemStack stack = item.getItem();
+		if(stack.isEmpty() || stack.getItem() instanceof IManaItem || stack.getItem() instanceof IRelic || BLACKLIST.contains(Item.REGISTRY.getNameForObject(stack.getItem())) || BotaniaAPI.isItemBlacklistedFromMagnet(stack))
 			return false;
 
-		int x = net.minecraft.util.MathHelper.floor_double(item.posX);
-		int y = (int) Math.floor(item.posY);
-		int z = net.minecraft.util.MathHelper.floor_double(item.posZ);
-		Block block = item.worldObj.getBlock(x, y, z);
-		int meta = item.worldObj.getBlockMetadata(x, y, z);
+		BlockPos pos = new BlockPos(item);
 
-		if(BotaniaAPI.isBlockBlacklistedFromMagnet(block, meta))
+		if(BotaniaAPI.isBlockBlacklistedFromMagnet(item.world.getBlockState(pos)))
 			return false;
 
-		block = item.worldObj.getBlock(x, y - 1, z);
-		meta = item.worldObj.getBlockMetadata(x, y - 1, z);
-
-		if(BotaniaAPI.isBlockBlacklistedFromMagnet(block, meta))
+		if(BotaniaAPI.isBlockBlacklistedFromMagnet(item.world.getBlockState(pos.down())))
 			return false;
 
 		return true;
@@ -158,7 +132,7 @@ public class ItemMagnetRing extends ItemBauble {
 	}
 
 	public static void addItemToBlackList(String item) {
-		BLACKLIST.add(item);
+		BLACKLIST.add(new ResourceLocation(item));
 	}
 
 	@Override

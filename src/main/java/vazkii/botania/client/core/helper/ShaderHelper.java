@@ -2,31 +2,34 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Apr 9, 2014, 11:20:26 PM (GMT)]
  */
 package vazkii.botania.client.core.helper;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.resources.SimpleReloadableResourceManager;
+import net.minecraftforge.fml.common.Loader;
 
-import org.apache.logging.log4j.Level;
 import org.lwjgl.opengl.ARBFragmentShader;
 import org.lwjgl.opengl.ARBShaderObjects;
 import org.lwjgl.opengl.ARBVertexShader;
 import org.lwjgl.opengl.GL11;
-
 import vazkii.botania.api.internal.ShaderCallback;
 import vazkii.botania.client.core.handler.ClientTickHandler;
 import vazkii.botania.client.lib.LibResources;
+import vazkii.botania.common.Botania;
 import vazkii.botania.common.core.handler.ConfigHandler;
-import cpw.mods.fml.common.FMLLog;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 public final class ShaderHelper {
 
@@ -43,8 +46,39 @@ public final class ShaderHelper {
 	public static int filmGrain = 0;
 	public static int gold = 0;
 	public static int categoryButton = 0;
+	public static int alpha = 0;
+	
+	private static boolean hasIncompatibleMods = false;
+	private static boolean checkedIncompatibility = false;
+	private static boolean lighting;
+
+	private static void deleteShader(int id) {
+		if (id != 0) {
+			ARBShaderObjects.glDeleteObjectARB(id);
+		}
+	}
 
 	public static void initShaders() {
+		if (Minecraft.getMinecraft().getResourceManager() instanceof SimpleReloadableResourceManager) {
+			((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(manager -> {
+				deleteShader(pylonGlow); pylonGlow = 0;
+				deleteShader(enchanterRune); enchanterRune = 0;
+				deleteShader(manaPool); manaPool = 0;
+				deleteShader(doppleganger); doppleganger = 0;
+				deleteShader(halo); halo = 0;
+				deleteShader(dopplegangerBar); dopplegangerBar = 0;
+				deleteShader(terraPlateRune); terraPlateRune = 0;
+				deleteShader(filmGrain); filmGrain = 0;
+				deleteShader(gold); gold = 0;
+				deleteShader(categoryButton); categoryButton = 0;
+				deleteShader(alpha); alpha = 0;
+
+				loadShaders();
+			});
+		}
+	}
+
+	private static void loadShaders() {
 		if(!useShaders())
 			return;
 
@@ -58,12 +92,16 @@ public final class ShaderHelper {
 		filmGrain = createProgram(null, LibResources.SHADER_FILM_GRAIN_FRAG);
 		gold = createProgram(null, LibResources.SHADER_GOLD_FRAG);
 		categoryButton = createProgram(null, LibResources.SHADER_CATEGORY_BUTTON_FRAG);
+		alpha = createProgram(LibResources.SHADER_ALPHA_VERT, LibResources.SHADER_ALPHA_FRAG);
 	}
 
 	public static void useShader(int shader, ShaderCallback callback) {
 		if(!useShaders())
 			return;
 
+		lighting = GL11.glGetBoolean(GL11.GL_LIGHTING);
+		GlStateManager.disableLighting();
+		
 		ARBShaderObjects.glUseProgramObjectARB(shader);
 
 		if(shader != 0) {
@@ -80,18 +118,29 @@ public final class ShaderHelper {
 	}
 
 	public static void releaseShader() {
+		if(lighting)
+			GlStateManager.enableLighting();
 		useShader(0);
 	}
 
 	public static boolean useShaders() {
-		return ConfigHandler.useShaders && OpenGlHelper.shadersSupported;
+		return ConfigHandler.useShaders && OpenGlHelper.shadersSupported && checkIncompatibleMods();
+	}
+	
+	private static boolean checkIncompatibleMods() {
+		if(!checkedIncompatibility) {
+			hasIncompatibleMods = Loader.isModLoaded("optifine");
+			checkedIncompatibility = true;
+		}
+		
+		return !hasIncompatibleMods;
 	}
 
 	// Most of the code taken from the LWJGL wiki
 	// http://lwjgl.org/wiki/index.php?title=GLSL_Shaders_with_LWJGL
 
 	private static int createProgram(String vert, String frag) {
-		int vertId = 0, fragId = 0, program = 0;
+		int vertId = 0, fragId = 0, program;
 		if(vert != null)
 			vertId = createShader(vert, VERT);
 		if(frag != null)
@@ -108,13 +157,13 @@ public final class ShaderHelper {
 
 		ARBShaderObjects.glLinkProgramARB(program);
 		if(ARBShaderObjects.glGetObjectParameteriARB(program, ARBShaderObjects.GL_OBJECT_LINK_STATUS_ARB) == GL11.GL_FALSE) {
-			FMLLog.log(Level.ERROR, getLogInfo(program));
+			Botania.LOGGER.error(getLogInfo(program));
 			return 0;
 		}
 
 		ARBShaderObjects.glValidateProgramARB(program);
 		if (ARBShaderObjects.glGetObjectParameteriARB(program, ARBShaderObjects.GL_OBJECT_VALIDATE_STATUS_ARB) == GL11.GL_FALSE) {
-			FMLLog.log(Level.ERROR, getLogInfo(program));
+			Botania.LOGGER.error(getLogInfo(program));
 			return 0;
 		}
 
@@ -149,52 +198,14 @@ public final class ShaderHelper {
 	}
 
 	private static String readFileAsString(String filename) throws Exception {
-		StringBuilder source = new StringBuilder();
 		InputStream in = ShaderHelper.class.getResourceAsStream(filename);
-		Exception exception = null;
-		BufferedReader reader;
 
 		if(in == null)
 			return "";
 
-		try {
-			reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-
-			Exception innerExc= null;
-			try {
-				String line;
-				while((line = reader.readLine()) != null)
-					source.append(line).append('\n');
-			} catch(Exception exc) {
-				exception = exc;
-			} finally {
-				try {
-					reader.close();
-				} catch(Exception exc) {
-					if(innerExc == null)
-						innerExc = exc;
-					else exc.printStackTrace();
-				}
-			}
-
-			if(innerExc != null)
-				throw innerExc;
-		} catch(Exception exc) {
-			exception = exc;
-		} finally {
-			try {
-				in.close();
-			} catch(Exception exc) {
-				if(exception == null)
-					exception = exc;
-				else exc.printStackTrace();
-			}
-
-			if(exception != null)
-				throw exception;
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
+			return reader.lines().collect(Collectors.joining("\n"));
 		}
-
-		return source.toString();
 	}
 
 }

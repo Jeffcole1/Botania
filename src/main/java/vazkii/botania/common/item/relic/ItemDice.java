@@ -2,36 +2,38 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Mar 30, 2015, 6:52:35 PM (GMT)]
  */
 package vazkii.botania.common.item.relic;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import net.minecraft.advancements.Advancement;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.Achievement;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import vazkii.botania.api.item.IRelic;
 import vazkii.botania.common.item.ModItems;
 import vazkii.botania.common.lib.LibItemNames;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemDice extends ItemRelic {
-
-	private static final int[] SIDES_FOR_MOON_PHASES = new int[] {
-		-1, 0, 1, 2, -1, 2, 3, 4
-	};
-
 	public static ItemStack[] relicStacks;
 
 	public ItemDice() {
@@ -47,38 +49,35 @@ public class ItemDice extends ItemRelic {
 		};
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
-		if(isRightPlayer(player, stack) && !player.worldObj.isRemote) {
-			int moonPhase = world.provider.getMoonPhase(world.getWorldTime());
-			int side = SIDES_FOR_MOON_PHASES[moonPhase];
-			int relic = side;
-			if(hasRelicAlready(player, relic)) {
-				List<Integer> possible = new ArrayList();
-				List<Integer> alreadyHas = new ArrayList();
-				for(int i = 0; i < 6; i++)
-					if(hasRelicAlready(player, i))
-						alreadyHas.add(i);
-					else possible.add(i);
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
+		ItemStack stack = player.getHeldItem(hand);
 
-				if(alreadyHas.size() > 0)
-					possible.add(alreadyHas.get(world.rand.nextInt(alreadyHas.size())));
-				relic = possible.get(world.rand.nextInt(possible.size()));
+		if(isRightPlayer(player, stack)) {
+			if(world.isRemote)
+				return ActionResult.newResult(EnumActionResult.SUCCESS, stack);
+
+			world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ARROW_SHOOT, SoundCategory.PLAYERS, 0.5F, 0.4F / (world.rand.nextFloat() * 0.4F + 0.8F));
+
+			List<Integer> possible = new ArrayList<>();
+			for(int i = 0; i < 6; i++) {
+				if(!hasRelicAlready(player, i))
+					possible.add(i);
 			}
 
-			world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (world.rand.nextFloat() * 0.4F + 0.8F));
-
-			if(hasRelicAlready(player, relic)) {
-				player.addChatMessage(new ChatComponentTranslation("botaniamisc.dudDiceRoll", relic + 1).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.DARK_GREEN)));
-				stack.stackSize--;
-				return stack;
+			if(possible.isEmpty()) {
+				player.sendMessage(new TextComponentTranslation("botaniamisc.dudDiceRoll", world.rand.nextInt(6) + 1).setStyle(new Style().setColor(TextFormatting.DARK_GREEN)));
+				stack.shrink(1);
+				return ActionResult.newResult(EnumActionResult.SUCCESS, stack);
+			} else {
+				int relic = possible.get(world.rand.nextInt(possible.size()));
+				player.sendMessage(new TextComponentTranslation("botaniamisc.diceRoll", relic + 1).setStyle(new Style().setColor(TextFormatting.DARK_GREEN)));
+				return ActionResult.newResult(EnumActionResult.SUCCESS, relicStacks[relic].copy());
 			}
-
-			player.addChatMessage(new ChatComponentTranslation("botaniamisc.diceRoll", relic + 1).setChatStyle(new ChatStyle().setColor(EnumChatFormatting.DARK_GREEN)));
-			return relicStacks[relic].copy();
 		}
 
-		return stack;
+		return ActionResult.newResult(EnumActionResult.PASS, stack);
 	}
 
 	@Override
@@ -86,15 +85,20 @@ public class ItemDice extends ItemRelic {
 		return false;
 	}
 
-	boolean hasRelicAlready(EntityPlayer player, int relic) {
-		if(relic < 0 || relic > 5 || !(player instanceof EntityPlayerMP))
+	private boolean hasRelicAlready(EntityPlayer player, int relic) {
+		if(relic < 0 || relic > relicStacks.length || !(player instanceof EntityPlayerMP))
 			return true;
 
 		EntityPlayerMP mpPlayer = (EntityPlayerMP) player;
 		Item item = relicStacks[relic].getItem();
-		IRelic irelic = (IRelic) item;
-		Achievement achievement = irelic.getBindAchievement();
-		return mpPlayer.func_147099_x().hasAchievementUnlocked(achievement);
+		ResourceLocation advId = ((IRelic) item).getAdvancement();
+
+		if(advId != null) {
+			Advancement adv = mpPlayer.getServerWorld().getAdvancementManager().getAdvancement(advId);
+			return adv != null && mpPlayer.getAdvancements().getProgress(adv).isDone();
+		}
+
+		return false;
 	}
 
 }

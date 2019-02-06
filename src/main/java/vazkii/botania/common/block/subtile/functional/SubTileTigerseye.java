@@ -2,16 +2,13 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Feb 16, 2014, 3:36:26 PM (GMT)]
  */
 package vazkii.botania.common.block.subtile.functional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
@@ -21,13 +18,16 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import vazkii.botania.api.lexicon.LexiconEntry;
 import vazkii.botania.api.subtile.RadiusDescriptor;
 import vazkii.botania.api.subtile.SubTileFunctional;
 import vazkii.botania.common.lexicon.LexiconData;
 import vazkii.botania.common.lib.LibObfuscation;
-import cpw.mods.fml.relauncher.ReflectionHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SubTileTigerseye extends SubTileFunctional {
 
@@ -37,15 +37,19 @@ public class SubTileTigerseye extends SubTileFunctional {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
+
+		if(supertile.getWorld().isRemote)
+			return;
+
 		final int cost = 70;
 
 		boolean shouldAfffect = mana >= cost;
 
-		List<EntityLiving> entities = supertile.getWorldObj().getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox(supertile.xCoord - RANGE, supertile.yCoord - RANGE_Y, supertile.zCoord - RANGE, supertile.xCoord + RANGE + 1, supertile.yCoord + RANGE_Y + 1, supertile.zCoord + RANGE + 1));
+		List<EntityLiving> entities = supertile.getWorld().getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB(supertile.getPos().add(-RANGE, -RANGE_Y, -RANGE), supertile.getPos().add(RANGE + 1, RANGE_Y + 1, RANGE + 1)));
 
 		for(EntityLiving entity : entities) {
-			List<EntityAITaskEntry> entries = new ArrayList(entity.tasks.taskEntries);
-			entries.addAll(new ArrayList(entity.targetTasks.taskEntries));
+			List<EntityAITaskEntry> entries = new ArrayList<>(entity.tasks.taskEntries);
+			entries.addAll(entity.targetTasks.taskEntries);
 
 			boolean avoidsOcelots = false;
 			if(shouldAfffect)
@@ -58,7 +62,7 @@ public class SubTileTigerseye extends SubTileFunctional {
 				}
 
 			if(entity instanceof EntityCreeper) {
-				ReflectionHelper.setPrivateValue(EntityCreeper.class, (EntityCreeper) entity, 2, LibObfuscation.TIME_SINCE_IGNITED);
+				((EntityCreeper) entity).timeSinceIgnited = 2;
 				entity.setAttackTarget(null);
 			}
 
@@ -71,21 +75,21 @@ public class SubTileTigerseye extends SubTileFunctional {
 	}
 
 	private boolean messWithRunAwayAI(EntityAIAvoidEntity aiEntry) {
-		if(ReflectionHelper.getPrivateValue(EntityAIAvoidEntity.class, aiEntry, LibObfuscation.TARGET_ENTITY_CLASS) == EntityOcelot.class) {
-			ReflectionHelper.setPrivateValue(EntityAIAvoidEntity.class, aiEntry, EntityPlayer.class, LibObfuscation.TARGET_ENTITY_CLASS);
+		if(aiEntry.classToAvoid == EntityOcelot.class) {
+			aiEntry.classToAvoid = EntityPlayer.class;
 			return true;
 		}
 		return false;
 	}
 
 	private void messWithGetTargetAI(EntityAINearestAttackableTarget aiEntry) {
-		if(ReflectionHelper.getPrivateValue(EntityAINearestAttackableTarget.class, aiEntry, LibObfuscation.TARGET_CLASS) == EntityPlayer.class)
-			ReflectionHelper.setPrivateValue(EntityAINearestAttackableTarget.class, aiEntry, EntityEnderCrystal.class, LibObfuscation.TARGET_CLASS); // Something random that won't be around
+		if(aiEntry.targetClass == EntityPlayer.class)
+			aiEntry.targetClass = EntityEnderCrystal.class; // Something random that won't be around
 	}
 
 	@Override
 	public RadiusDescriptor getRadius() {
-		return new RadiusDescriptor.Square(toChunkCoordinates(), RANGE);
+		return new RadiusDescriptor.Square(toBlockPos(), RANGE);
 	}
 
 	@Override

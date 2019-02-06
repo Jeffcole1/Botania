@@ -2,61 +2,75 @@
  * This class was created by <Vazkii>. It's distributed as
  * part of the Botania Mod. Get the Source Code in github:
  * https://github.com/Vazkii/Botania
- * 
+ *
  * Botania is Open Source and distributed under the
  * Botania License: http://botaniamod.net/license.php
- * 
+ *
  * File Created @ [Jun 20, 2014, 12:12:58 AM (GMT)]
  */
 package vazkii.botania.common.item;
 
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import vazkii.botania.common.block.subtile.functional.SubTileSpectranthemum;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.IFluidBlock;
 import vazkii.botania.common.lib.LibItemNames;
+
+import javax.annotation.Nonnull;
 
 public class ItemOpenBucket extends ItemMod {
 
 	public ItemOpenBucket() {
+		super(LibItemNames.OPEN_BUCKET);
 		setMaxStackSize(1);
-		setUnlocalizedName(LibItemNames.OPEN_BUCKET);
 	}
 
+	@Nonnull
 	@Override
-	public ItemStack onItemRightClick(ItemStack par1ItemStack, World par2World, EntityPlayer par3EntityPlayer) {
-		MovingObjectPosition movingobjectposition = getMovingObjectPositionFromPlayer(par2World, par3EntityPlayer, true);
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
+		RayTraceResult rtr = rayTrace(world, player, true);
+		ItemStack stack = player.getHeldItem(hand);
 
-		if(movingobjectposition == null)
-			return par1ItemStack;
+		if(rtr == null)
+			return ActionResult.newResult(EnumActionResult.PASS, stack);
 		else {
-			if(movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-				int i = movingobjectposition.blockX;
-				int j = movingobjectposition.blockY;
-				int k = movingobjectposition.blockZ;
+			if(rtr.typeOfHit == net.minecraft.util.math.RayTraceResult.Type.BLOCK) {
+				BlockPos pos = rtr.getBlockPos();
 
-				if(!par2World.canMineBlock(par3EntityPlayer, i, j, k))
-					return par1ItemStack;
+				if(!world.isBlockModifiable(player, pos))
+					return ActionResult.newResult(EnumActionResult.PASS, stack);
 
-				if(!par3EntityPlayer.canPlayerEdit(i, j, k, movingobjectposition.sideHit, par1ItemStack))
-					return par1ItemStack;
+				if(!player.canPlayerEdit(pos, rtr.sideHit, stack))
+					return ActionResult.newResult(EnumActionResult.PASS, stack);
 
-				Material material = par2World.getBlock(i, j, k).getMaterial();
-				int l = par2World.getBlockMetadata(i, j, k);
+				IBlockState state = world.getBlockState(pos);
+				Fluid fluid = FluidRegistry.lookupFluidForBlock(state.getBlock());
+				boolean isFull = state.getBlock() instanceof BlockLiquid && state.getValue(BlockLiquid.LEVEL) == 0
+						|| state.getBlock() instanceof IFluidBlock && Math.abs(((IFluidBlock) state.getBlock()).getFilledPercentage(world, pos)) >= 1;
 
-				if((material == Material.lava || material == Material.water) && l == 0) {
-					par2World.setBlockToAir(i, j, k);
-					
+				if(fluid != null && isFull) {
+					player.playSound(fluid.getFillSound(world, pos), 1.0f, 1.0f);
+					world.setBlockToAir(pos);
+
 					for(int x = 0; x < 5; x++)
-						par2World.spawnParticle("explode", i + Math.random(), j + Math.random(), k + Math.random(), 0, 0, 0);
-					
-					return par1ItemStack;
+						world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, pos.getX() + Math.random(), pos.getY() + Math.random(), pos.getZ() + Math.random(), 0, 0, 0);
+
+					return ActionResult.newResult(EnumActionResult.SUCCESS, stack);
 				}
 			}
 
-			return par1ItemStack;
+			return ActionResult.newResult(EnumActionResult.PASS, stack);
 		}
 	}
 
