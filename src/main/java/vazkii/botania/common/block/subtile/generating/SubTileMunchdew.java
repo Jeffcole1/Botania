@@ -48,6 +48,7 @@ public class SubTileMunchdew extends SubTileGenerating {
 		if(cooldown > 0) {
 			cooldown--;
 			ticksWithoutEating = 0;
+			ateOnce = false;
 			return;
 		}
 
@@ -100,7 +101,6 @@ public class SubTileMunchdew extends SubTileGenerating {
 			if(ticksWithoutEating >= 5)
 			{
 				cooldown = 1600;
-				ateOnce = false;
 			}
 		}
 	}
